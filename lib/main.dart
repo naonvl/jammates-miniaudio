@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   runApp(const MyApp());
@@ -28,12 +29,18 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final _methodChannel = const MethodChannel("method_channel");
   bool _isPlaying = false;
   int _drumVolume = 100;
   int _bassVolume = 100;
   int _pianoVolume = 100;
 
   void _togglePlay() {
+    if(_isPlaying){
+      _methodChannel.invokeMethod("playSound",{"text":'=====TEST====='});
+    } else {
+      _methodChannel.invokeMethod("stopSound",{"text":'=====TEST====='});
+    }
     setState(() {
       _isPlaying = !_isPlaying;
     });
