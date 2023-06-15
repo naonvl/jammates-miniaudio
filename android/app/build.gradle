@@ -46,12 +46,30 @@ android {
     }
 
     buildTypes {
+	  debug { 
+		 ndk {
+		   abiFilters "armeabi-v7a"
+		   //abiFilters ABI_FILTERS
+		 }
+	   }
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
+		ndk {
+		   abiFilters "armeabi-v7a"
+		   //abiFilters ABI_FILTERS
+		 }
             signingConfig signingConfigs.debug
         }
     }
+	
+	sourceSets {
+        main {
+            jniLibs.filter.include("**/*")
+
+        }
+    }
+	
 }
 
 flutter {
