@@ -1,4 +1,4 @@
-package com.example.jammates;
+package com.example.jammates_miniaudio;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -61,24 +61,22 @@ public class MainActivity extends FlutterActivity {
 					
                     break;
                 case "updateDrumVolume":
-                    float drumVolume = call.argument("volume");
+                    float drumVolume = ((Number) call.argument("volume")).floatValue();
                     Log.d("TAG", "Drum volume updated: " + drumVolume);
-					
-					miniAudioPlayer.SetMusicVolumeOf("audio/drum.mp3", drumVolume);
+                    miniAudioPlayer.SetMusicVolumeOf("audio/drum.mp3", drumVolume);
                     break;
                 case "updateBassVolume":
-                    float bassVolume = call.argument("volume");
+                    float bassVolume = ((Number) call.argument("volume")).floatValue();
                     Log.d("TAG", "Bass volume updated: " + bassVolume);
-					
-					miniAudioPlayer.SetMusicVolumeOf("audio/bass.mp3", bassVolume);
+                    miniAudioPlayer.SetMusicVolumeOf("audio/bass.mp3", bassVolume);
                     break;
                 case "updatePianoVolume":
-                    float pianoVolume = call.argument("volume");
+                    float pianoVolume = ((Number) call.argument("volume")).floatValue();
                     Log.d("TAG", "Piano volume updated: " + pianoVolume);
-					
-					miniAudioPlayer.SetMusicVolumeOf("audio/piano.mp3", pianoVolume);
+                    miniAudioPlayer.SetMusicVolumeOf("audio/piano.mp3", pianoVolume);
                     break;
                 default:
+
                     Log.e("TAG", "ERROR");
                     break;
             }
