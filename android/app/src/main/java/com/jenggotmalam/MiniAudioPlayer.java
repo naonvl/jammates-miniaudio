@@ -67,6 +67,21 @@ public class MiniAudioPlayer {
 		}
 	}
 	
+	public void StopAllAudio()
+	{
+		StopMiniaudio();	
+	}
+			
+	public void PauseAllAudio()
+	{
+		PauseMiniaudio();	
+	}
+					
+	public void ResumeAllAudio()
+	{
+		ResumeMiniaudio();	
+	}
+		
 	public void PlayAllAudio()
 	{
 		// restart playing
@@ -89,10 +104,13 @@ public class MiniAudioPlayer {
 	public native void InitMiniaudio();
 	public native void PlayMiniaudio();
 	
+	public native void StopMiniaudio();
+	public native void PauseMiniaudio();
+	public native void ResumeMiniaudio();
+	
 	public native void SetVolumeForMusic(int pos, float vol);
 	
 	public native void StartThreadMiniaudio();
-	//public native void StopMiniaudio();
 
 	
 }
