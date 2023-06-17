@@ -34,10 +34,6 @@ public class MainActivity extends FlutterActivity {
 		miniAudioPlayer.AddMusicStreamToPlay("audio/piano.mp3");
 		
 		
-		/// Set Volume
-		miniAudioPlayer.SetMusicVolumeOf("audio/bass.mp3", 1.0f);
-		miniAudioPlayer.SetMusicVolumeOf("audio/drum.mp3", 0.5f);
-		miniAudioPlayer.SetMusicVolumeOf("audio/piano.mp3", 0.2f);
     }
 	
     @Override
@@ -57,9 +53,21 @@ public class MainActivity extends FlutterActivity {
                 case "stopSound":
                     Log.d("TAG", "Stop sound: " + call.argument("text"));
 					
-					// Not implemented yet
+					miniAudioPlayer.StopAllAudio();
 					
                     break;
+				case "pauseSound":
+                    Log.d("TAG", "Stop sound: " + call.argument("text"));
+					
+					miniAudioPlayer.PauseAllAudio();
+					
+                break;
+				case "resumeSound":
+                    Log.d("TAG", "Stop sound: " + call.argument("text"));
+					
+					miniAudioPlayer.ResumeAllAudio();
+					
+                break;
                 case "updateDrumVolume":
                     float drumVolume = call.argument("volume");
                     Log.d("TAG", "Drum volume updated: " + drumVolume);
