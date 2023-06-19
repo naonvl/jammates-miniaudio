@@ -12,7 +12,7 @@ public class MiniAudioPlayer {
 	private Map<String, Integer> musicList;
 	
 	public Thread audioThread;
-	private static final String TAG = "Imandana";
+	private static final String TAG = "MiniAudioJava";
 
 	/// Temporary, cannot be decreased dynamically
 	private int indexMusic = 0;

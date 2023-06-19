@@ -43,32 +43,23 @@ android {
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
-    }
-
-    buildTypes {
-	  debug { 
-		 ndk {
-		   abiFilters "armeabi-v7a"
-		   //abiFilters ABI_FILTERS
-		 }
-	   }
-        release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-		ndk {
-		   abiFilters "armeabi-v7a"
-		   //abiFilters ABI_FILTERS
-		 }
-            signingConfig signingConfigs.debug
-        }
+		
+		
+		externalNativeBuild {
+            cmake {
+                version = "3.24.1"
+                abiFilters 'armeabi-v7a' , 'arm64-v8a'
+                //arguments "-DANDROID_STL=c++_shared"
+                //cppFlags "-std=c++17"
+            }
+        }	
     }
 	
-	sourceSets {
-        main {
-            jniLibs.filter.include("**/*")
-
+	externalNativeBuild {
+        cmake {
+            path 'CMakeLists.txt'
         }
-    }
+    }	
 	
 }
 
