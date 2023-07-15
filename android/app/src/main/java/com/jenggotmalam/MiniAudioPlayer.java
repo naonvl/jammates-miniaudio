@@ -16,7 +16,7 @@ public class MiniAudioPlayer {
 
 	/// Temporary, cannot be decreased dynamically
 	private int indexMusic = 0;
-	private ArrayList<int> reservedPos;
+	private ArrayList<Integer> reservedPos;
 	
     public MiniAudioPlayer(Activity activity) {
 
@@ -27,7 +27,7 @@ public class MiniAudioPlayer {
 		InitMiniaudio();
 		
 		musicList = new HashMap<String, Integer>();
-		reservedPos = new ArrayList<int>();
+		reservedPos = new ArrayList<Integer>();
 		
 		
 		audioThread = new Thread(new Runnable() {
@@ -148,3 +148,4 @@ public class MiniAudioPlayer {
 
 	
 }
+

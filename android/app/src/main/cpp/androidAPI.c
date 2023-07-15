@@ -61,16 +61,14 @@ void ExecutePlayer()
 			}
 			
 			setPitchReady = 1;
-			// prevent processor halt
-			usleep( 600000 ); // 0.6 seconds
+			usleep( 3000 ); 
 		}
 		
-		setPitchReady = 0;
+		setPitchReady = 1;
 		// prevent processor halt
 		usleep( 600000 ); // 0.6 seconds
 	}
 }
-
 
 void SetPitchAll( float pitch)
 {
@@ -198,7 +196,7 @@ Java_com_jenggotmalam_MiniAudioPlayer_InitAssetManagerMini(JNIEnv *env, jobject 
 		(*env)->ReleaseStringUTFChars(env, pathObj, path);
 
 }
-
+ 
 JNIEXPORT void JNICALL
 Java_com_jenggotmalam_MiniAudioPlayer_AddMusicStream(JNIEnv *env, jobject obj,  jstring pathName)
 {
@@ -210,7 +208,7 @@ Java_com_jenggotmalam_MiniAudioPlayer_AddMusicStream(JNIEnv *env, jobject obj,  
     const char *str = (*env)->GetStringUTFChars(env, pathName, NULL);
 	
 	LOGI("ILoadMusicStream( str ); ");
-	musicListTogether.music[ musicListTogether.indexToPlay[ musicListTogether.count ] = LoadMusicStream( str );
+	musicListTogether.music[ musicListTogether.indexToPlay[ musicListTogether.count ] ] = LoadMusicStream( str );
 	
 	musicListTogether.count++;
 	

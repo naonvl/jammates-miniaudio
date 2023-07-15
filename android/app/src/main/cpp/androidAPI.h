@@ -34,6 +34,8 @@ int isClosed = 0;
 //int pauseMusic = 0;
 int isPlaying = 0;
 int setPitchReady = 0;
+//int pitchValue = 0;
+
 
 /// Using this for dynamic music load, but the MAX is fixed size
 struct MusicListTogether
@@ -56,7 +58,7 @@ Music pianoAudio;
 void InitDeviceMiniaudio();
 void ExecutePlayer();
 
-void SetPitchAll( float )
+void SetPitchAll( float );
 
 void StartPlayer();
 void StopPlayer();
@@ -92,8 +94,7 @@ JNIEXPORT void JNICALL
 Java_com_jenggotmalam_MiniAudioPlayer_PlayMiniaudio(JNIEnv *env, jobject instance);
 
 JNIEXPORT void JNICALL
-Java_com_jenggotmalam_MiniAudioPlayer_SetPitchAllMusic(JNIEnv *env, jobject instance);
-
+Java_com_jenggotmalam_MiniAudioPlayer_SetPitchAllMusic(JNIEnv *env, jobject instance, jfloat pitch);
 
 
 JNIEXPORT void JNICALL
