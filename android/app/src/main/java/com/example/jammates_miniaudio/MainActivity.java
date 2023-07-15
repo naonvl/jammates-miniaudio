@@ -33,6 +33,9 @@ public class MainActivity extends FlutterActivity {
 		miniAudioPlayer.AddMusicStreamToPlay("audio/drum.mp3");
 		miniAudioPlayer.AddMusicStreamToPlay("audio/piano.mp3");
 		
+		/// 
+		//miniAudioPlayer.SetPitchAllAudio( 2.0f );
+		
 		
     }
 	
@@ -86,6 +89,14 @@ public class MainActivity extends FlutterActivity {
 					
 					miniAudioPlayer.SetMusicVolumeOf("audio/piano.mp3", pianoVolume);
                     break;
+					
+				case "setPitch":
+                    float pitch = call.argument("pitch");
+                    Log.d("TAG", "Pitch volume updated: " + pitch);
+					
+					miniAudioPlayer.SetPitchAllAudio( pitch );
+                    break;
+					
                 default:
                     Log.e("TAG", "ERROR");
                     break;

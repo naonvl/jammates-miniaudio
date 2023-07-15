@@ -51,6 +51,7 @@ void ExecutePlayer()
     {
 		while ( isPlaying )
 		{
+			setPitchReady = 0;
 			LOGI("UpdateMusicStream(music);");
 			for(int i = 0; i < musicListTogether.count; i++)
 			{				
@@ -58,11 +59,32 @@ void ExecutePlayer()
 				if ( isPlaying == 0 ) break;
 				UpdateMusicStream( musicListTogether.music[ musicListTogether.indexToPlay[ i ] ] );
 			}
+			
+			setPitchReady = 1;
+			// prevent processor halt
+			usleep( 600000 ); // 0.6 seconds
+		}
+		
+		setPitchReady = 0;
+		// prevent processor halt
+		usleep( 600000 ); // 0.6 seconds
+	}
+}
+
+
+void SetPitchAll( float pitch)
+{
+	while(1)
+	{
+		if( setPitchReady )
+		{
+			for(int i = 0; i < musicListTogether.count; i++)
+			{				
+				SetMusicPitch( musicListTogether.music[ musicListTogether.indexToPlay[ i ] ], pitch );
+			}
+			break;
 		}
 	}
-
-	// prevent processor halt
-	usleep( 600000 ); // 0.6 seconds
 }
 
 void StartPlayer()
@@ -181,17 +203,35 @@ JNIEXPORT void JNICALL
 Java_com_jenggotmalam_MiniAudioPlayer_AddMusicStream(JNIEnv *env, jobject obj,  jstring pathName)
 {
 
+	if( musicListTogether.count > NUM_OF_MUSIC)
+		return;
+	
 	LOGI("GetStringUTFChars(env, pathName, NULL);");
     const char *str = (*env)->GetStringUTFChars(env, pathName, NULL);
 	
 	LOGI("ILoadMusicStream( str ); ");
-	musicListTogether.music[ musicListTogether.count ] = LoadMusicStream( str );
+	musicListTogether.music[ musicListTogether.indexToPlay[ musicListTogether.count ] = LoadMusicStream( str );
 	
 	musicListTogether.count++;
 	
 	LOGI("ReleaseStringUTFChars(env, pathName, str); ");
 	(*env)->ReleaseStringUTFChars(env, pathName, str);
 }
+
+
+JNIEXPORT void JNICALL
+Java_com_jenggotmalam_MiniAudioPlayer_RemoveMusicStream(JNIEnv *env, jobject obj, jint pos)
+{
+	// swap
+	int temp = musicListTogether.indexToPlay[ musicListTogether.count - 1 ] ;	// last data
+	
+	UnloadMusicStream( musicListTogether.music[ musicListTogether.indexToPlay[ pos ] ] );
+	musicListTogether.indexToPlay[ musicListTogether.count - 1 ] = musicListTogether.indexToPlay[ pos ];
+	musicListTogether.indexToPlay[ pos ] = temp;
+
+	musicListTogether.count--;
+}
+
 
 JNIEXPORT void JNICALL
 Java_com_jenggotmalam_MiniAudioPlayer_SetVolumeForMusic(JNIEnv *env, jobject obj, jint pos, jfloat vol)
@@ -238,6 +278,11 @@ Java_com_jenggotmalam_MiniAudioPlayer_PlayMiniaudio(JNIEnv *env, jobject instanc
 
 }
 
+JNIEXPORT void JNICALL
+Java_com_jenggotmalam_MiniAudioPlayer_SetPitchAllMusic(JNIEnv *env, jobject instance, jfloat pitch)
+{
+	SetPitchAll( pitch );
+}
 
 JNIEXPORT void JNICALL
 Java_com_jenggotmalam_MiniAudioPlayer_StopMiniaudio(JNIEnv *env, jobject instance)

@@ -16,6 +16,7 @@ public class MiniAudioPlayer {
 
 	/// Temporary, cannot be decreased dynamically
 	private int indexMusic = 0;
+	private ArrayList<int> reservedPos;
 	
     public MiniAudioPlayer(Activity activity) {
 
@@ -26,6 +27,7 @@ public class MiniAudioPlayer {
 		InitMiniaudio();
 		
 		musicList = new HashMap<String, Integer>();
+		reservedPos = new ArrayList<int>();
 		
 		
 		audioThread = new Thread(new Runnable() {
@@ -39,16 +41,40 @@ public class MiniAudioPlayer {
 					 });
     }
 
-	public void AddMusicStreamToPlay(String pathName) // audio/bass.mp3
+	public void AddMusicStreamToPlay(String pathName) // 
 	{
+		if( indexMusic >= 12 ) // For now harddoced
+			return;
+			
 		Log.v(TAG, "AddMusicStreamToPlay(String pathName)");
-		musicList.put(pathName, indexMusic);
+		
+		if(reservedPos.size() > 0)
+		{
+			musicList.put(pathName, reservedPos.get( 0 ) );
+			reservedPos.remove( 0 );
+		}
+		else
+		{
+			musicList.put(pathName, indexMusic);
+		}
 		indexMusic++;
 		
 		Log.v(TAG, "AddMusicStream( pathName );");
 		AddMusicStream( pathName );
+
+	}
+	
+	public void RemoveMusicStreamFromPlay(String pathName) // 
+	{
+		int pos = musicList.get( pathName );
+		musicList.remove( pos );
 		
-		Log.v(TAG, "AddMusicStream( pathName );");
+		reservedPos.add( pos );
+		
+		indexMusic--;
+		
+		Log.v(TAG, "RemoveMusicStream( pos );");
+		RemoveMusicStream( pos );
 	}
 	
 	public void SetMusicVolumeOf(String pathName, float vol)
@@ -65,6 +91,11 @@ public class MiniAudioPlayer {
 			audioThread.start();
 			return;
 		}
+	}
+	
+	public void SetPitchAllAudio(float pitch)
+	{
+		SetPitchAllMusic( pitch );	
 	}
 	
 	public void StopAllAudio()
@@ -100,9 +131,12 @@ public class MiniAudioPlayer {
 
 	public native void SetIsClosed(int value);
 	public native void AddMusicStream(String pathName);
+	public native void RemoveMusicStream(int pos);
 	public native void CleanResource();
 	public native void InitMiniaudio();
 	public native void PlayMiniaudio();
+	
+	public native void SetPitchAllMusic(float pitch);
 	
 	public native void StopMiniaudio();
 	public native void PauseMiniaudio();
