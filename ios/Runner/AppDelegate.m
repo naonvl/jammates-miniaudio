@@ -6,12 +6,21 @@
 #import <Flutter/Flutter.h>
 #import "GeneratedPluginRegistrant.h"
 
+#include "iosAPI.h"
+#include "iosAPI.c"
+
+
+
 @implementation AppDelegate {
   FlutterEventSink _eventSink;
 }
 
 - (BOOL)application:(UIApplication*)application
     didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
+		
+		
+  InitDeviceMiniaudio();
+   
   [GeneratedPluginRegistrant registerWithRegistry:self];
   FlutterViewController* controller =
       (FlutterViewController*)self.window.rootViewController;
@@ -20,14 +29,9 @@
       methodChannelWithName:@"Battery"
             binaryMessenger:controller];
 			
-  FlutterMethodChannel* loadAudioChannel = [FlutterMethodChannel
-      methodChannelWithName:@"LoadAudio"
+  FlutterMethodChannel* audioMethodChannel = [FlutterMethodChannel
+      methodChannelWithName:@"method_channel"
             binaryMessenger:controller];
-			
-  FlutterMethodChannel* playAudioChannel = [FlutterMethodChannel
-      methodChannelWithName:@"PlayAudio"
-            binaryMessenger:controller];
-			
 			
 			
   __weak typeof(self) weakSelf = self;
@@ -47,19 +51,26 @@
     }
   }];
   
-  // PlayAudio
-  [playAudioChannel setMethodCallHandler:^(FlutterMethodCall* call,
+  % // LoadAudio
+  % [audioMethodChannel setMethodCallHandler:^(FlutterMethodCall* call,
+                                         % FlutterResult result) {
+    % if ([@"AddMusic" isEqualToString:call.method]) {
+		% AddMusic();
+    % }
+  % }];
+  
+  // LoadAudio
+  [audioMethodChannel setMethodCallHandler:^(FlutterMethodCall* call,
+                                         FlutterResult result) {
+    if ([@"playSound" isEqualToString:call.method]) {
+		StartPlayer();
+    }
+  }];
+  // LoadAudio
+  [audioMethodChannel setMethodCallHandler:^(FlutterMethodCall* call,
                                          FlutterResult result) {
     if ([@"ExecutePlayer" isEqualToString:call.method]) {
 		ExecutePlayer();
-    }
-  }];
-
-  // LoadAudio
-  [loadAudioChannel setMethodCallHandler:^(FlutterMethodCall* call,
-                                         FlutterResult result) {
-    if ([@"AddMusic" isEqualToString:call.method]) {
-		AddMusic();
     }
   }];
 
