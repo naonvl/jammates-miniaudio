@@ -51,9 +51,13 @@ void AddMusic(const char* path)
 	
 	//NSString* databasePathFromApp = [[NSBundle mainBundle] pathForResource:@"triggers" ofType:@"sql"];
 	
-	NSString *pathIOS = [[NSBundle mainBundle] pathForResource:@path ofType:@"mp3"];
+	NSString *NSstr = [NSString stringWithUTF8String:path];
 	
-	musicListTogether.music[ musicListTogether.indexToPlay[ musicListTogether.count ] ] = LoadMusicStream( pathIOS );
+	NSString *pathIOS = [[NSBundle mainBundle] pathForResource:NSstr ofType:@"mp3"];
+	
+	const char* cStr = [pathIOS UTF8String];
+	
+	musicListTogether.music[ musicListTogether.indexToPlay[ musicListTogether.count ] ] = LoadMusicStream( cStr );
 	musicListTogether.count++;
 	
 }

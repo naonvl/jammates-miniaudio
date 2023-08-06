@@ -3,7 +3,7 @@
 #define IOS_API_H
 
 #include <string.h>
-#include <sys\types.h>
+#include <sys/types.h>
 
 #include "raudio.h"
 #include "external/utilities/UTILS/utils.h"

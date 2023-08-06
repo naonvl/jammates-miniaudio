@@ -16,7 +16,7 @@
 
 - (void)createThread {
     [self performSelectorInBackground:@selector(threadMainWithOptionalArgument:)
-                           withObject:someObject];
+                           withObject:nil];
 }
 
 - (void)threadMainWithOptionalArgument:(id)argument {
