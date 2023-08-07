@@ -35,7 +35,7 @@ void ExecutePlayer()
 			}
 			
 			setPitchReady = 1;
-			usleep( 2000 ); 
+			//usleep( 2000 ); 
 		}
 		
 		setPitchReady = 1;
