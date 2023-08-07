@@ -2658,10 +2658,12 @@ static bool SaveFileData(const char *fileName, void *data, unsigned int bytesToW
             else TRACELOG(LOG_INFO, "FILEIO: [%s] File saved successfully", fileName);
 
             fclose(file);
+			return true;
         }
-        else TRACELOG(LOG_WARNING, "FILEIO: [%s] Failed to open file", fileName);
+        else { TRACELOG(LOG_WARNING, "FILEIO: [%s] Failed to open file", fileName); return false; }
+		
     }
-    else TRACELOG(LOG_WARNING, "FILEIO: File name provided is not valid");
+    else { TRACELOG(LOG_WARNING, "FILEIO: File name provided is not valid"); return false; }
 }
 
 // Save text data to file (write), string must be '\0' terminated

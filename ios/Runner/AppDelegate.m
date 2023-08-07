@@ -39,7 +39,7 @@
   AddMusic("bass");
    
   // Execute thread
-  [self createThread]  
+  [self createThread] ;
    
   [GeneratedPluginRegistrant registerWithRegistry:self];
   FlutterViewController* controller =
