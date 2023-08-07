@@ -55,6 +55,10 @@ void AddMusic(const char* path)
 	
 	NSLog(NSstr);
 
+	NSString *pathIOS1 = [[NSBundle mainBundle] pathForResource:NSstr ofType:nil];
+	
+	NSLog(pathIOS1);	
+	
 	NSString *pathIOS = [[NSBundle mainBundle] pathForResource:NSstr ofType:@"mp3"];
 	
 	NSLog(pathIOS);

@@ -36,7 +36,7 @@
   InitDeviceMiniaudio();
   
   // Add Mp3
-  AddMusic("bass");
+  AddMusic("bass.mp3");
    
   // Execute thread
   [self createThread] ;
