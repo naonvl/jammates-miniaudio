@@ -102,15 +102,15 @@
     #include "raudio.h"
     // Check if config flags have been externally provided on compilation line
     #if !defined(EXTERNAL_CONFIG_FLAGS)
-        #include "external/utilities/Android/config.h"     // Defines module configuration flags
+        #include "external/utilities/UTILS/config.h"     // Defines module configuration flags
     #endif
 	
 	#if defined(PLATFORM_ANDROID)
-		#include "external/utilities/Android/utils.h"          // Required for: fopen() Android mapping
+		#include "external/utilities/UTILS/utils.h"          // Required for: fopen() Android mapping
 	#endif 
 	
 	#if defined(PLATFORM_IOS)
-		#include "external/utilities/IOS/utils.h"          // Required for: IOS mapping
+		#include "external/utilities/UTILS/utils.h"          // Required for: IOS mapping
 	#endif 
 #endif
 

@@ -6,6 +6,8 @@
 #import <Flutter/Flutter.h>
 #import "GeneratedPluginRegistrant.h"
 
+
+#define PLATFORM_IOS
 #include "iosAPI.h"
 #include "iosAPI.c"
 
