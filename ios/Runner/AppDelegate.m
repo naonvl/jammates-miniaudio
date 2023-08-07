@@ -12,22 +12,24 @@
 #include "iosAPI.c"
 
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <pthread.h>
+ 
+void *worker(void *data)
+{
+    ExecutePlayer();
+    return NULL;
+}
+ 
+pthread_t th1;
+
+
 @implementation AppDelegate {
   FlutterEventSink _eventSink;
 }
 
-- (void)createThread {
-    [self performSelectorInBackground:@selector(threadMainWithOptionalArgument:)
-                           withObject:nil];
-}
-
-- (void)threadMainWithOptionalArgument:(id)argument {
-    // To avoid memory leaks, the first thing a thread method needs to do is
-    // create a new autorelease pool, either manually or via "@autoreleasepool".
-    @autoreleasepool {
-        ExecutePlayer();
-    }
-}
 
 - (BOOL)application:(UIApplication*)application
     didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
@@ -37,10 +39,14 @@
   
   // Add Mp3
   AddMusic("bass.mp3");
+  AddMusic("drum.mp3");
+  AddMusic("piano.mp3");
+   
+  SetMasterVolume(1.0f);
    
   // Execute thread
-  [self createThread] ;
-   
+  pthread_create(&th1, NULL, worker, "ExecutePlayer");
+  
   [GeneratedPluginRegistrant registerWithRegistry:self];
   FlutterViewController* controller =
       (FlutterViewController*)self.window.rootViewController;

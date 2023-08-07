@@ -35,7 +35,7 @@ void ExecutePlayer()
 			}
 			
 			setPitchReady = 1;
-			usleep( 3000 ); 
+			usleep( 2000 ); 
 		}
 		
 		setPitchReady = 1;
@@ -67,6 +67,7 @@ void AddMusic(const char* path)
 	const char* cStr = [pathIOS1 UTF8String];
 	
 	musicListTogether.music[ musicListTogether.indexToPlay[ musicListTogether.count ] ] = LoadMusicStream( cStr );
+	SetMusicVolume( musicListTogether.music[ musicListTogether.indexToPlay[ musicListTogether.count ] ], 1.0f );
 	musicListTogether.count++;
 	
 }
