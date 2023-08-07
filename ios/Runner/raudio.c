@@ -2681,10 +2681,11 @@ static bool SaveFileText(const char *fileName, char *text)
             else TRACELOG(LOG_INFO, "FILEIO: [%s] Text file saved successfully", fileName);
 
             fclose(file);
+			return true;
         }
-        else TRACELOG(LOG_WARNING, "FILEIO: [%s] Failed to open text file", fileName);
+        else { TRACELOG(LOG_WARNING, "FILEIO: [%s] Failed to open text file", fileName); return false; }
     }
-    else TRACELOG(LOG_WARNING, "FILEIO: File name provided is not valid");
+    else { TRACELOG(LOG_WARNING, "FILEIO: File name provided is not valid"); return false; }
 }
 #endif
 
