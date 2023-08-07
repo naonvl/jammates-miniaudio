@@ -53,7 +53,13 @@ void AddMusic(const char* path)
 	
 	NSString *NSstr = [NSString stringWithUTF8String:path];
 	
+	NSLog(NSstr);
+	NSLog(@"/n");
+	
 	NSString *pathIOS = [[NSBundle mainBundle] pathForResource:NSstr ofType:@"mp3"];
+	
+	NSLog(pathIOS);
+	NSLog(@"/n");
 	
 	const char* cStr = [pathIOS UTF8String];
 	
