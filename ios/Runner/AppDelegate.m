@@ -71,6 +71,8 @@
     }
   }];
   
+  StartPlayer();
+  
 ///////////////
   // LoadAudio
   [audioMethodChannel setMethodCallHandler:^(FlutterMethodCall* call,
