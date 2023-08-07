@@ -5,8 +5,10 @@
 #include <string.h>
 #include <sys/types.h>
 
-#include "raudio.h"
 #include "external/utilities/UTILS/utils.h"
+
+#include "raudio.h"
+#include "raudio.c"
 
 #include <stdio.h>              // Required for: printf()
 
