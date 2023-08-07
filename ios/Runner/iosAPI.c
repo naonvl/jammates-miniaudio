@@ -59,12 +59,12 @@ void AddMusic(const char* path)
 	
 	NSLog(pathIOS1);	
 	
-	NSString *pathIOS = [[NSBundle mainBundle] pathForResource:NSstr ofType:@"mp3"];
+/* 	NSString *pathIOS = [[NSBundle mainBundle] pathForResource:NSstr ofType:@"mp3"];
 	
 	NSLog(pathIOS);
-	NSLog(@"/n");
+	NSLog(@"/n"); */
 	
-	const char* cStr = [pathIOS UTF8String];
+	const char* cStr = [pathIOS1 UTF8String];
 	
 	musicListTogether.music[ musicListTogether.indexToPlay[ musicListTogether.count ] ] = LoadMusicStream( cStr );
 	musicListTogether.count++;
