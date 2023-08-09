@@ -15,9 +15,9 @@
  
 #define MA_NO_DECODING
 #define MA_NO_ENCODING
-#undef MA_NO_GENERATION
+#define MINIAUDIO_IMPLEMENTATION
 
-  #include "external/miniaudio.h"
+#include "external/miniaudio.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
