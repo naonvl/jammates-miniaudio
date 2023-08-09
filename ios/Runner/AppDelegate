@@ -8,24 +8,30 @@
 
 
 #define PLATFORM_IOS
-#include "iosAPI.h"
+#define MINIAUDIO_IMPLEMENTATION
+/* #include "iosAPI.h"
 #include "iosAPI.c"
 
-
+ */
  
-//#include "external/miniaudio.h"
+#include "external/miniaudio.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <pthread.h>
  
 
-/* ma_result result;
+ma_result result;
 ma_engine engine;
- */
+NSString *pathIOS1 ;
+const char* cStr;
+
 void *worker(void *data)
 {
-    ExecutePlayer();
+    //ExecutePlayer();
+	ma_engine_play_sound(&engine, cStr, NULL);
+
+	ma_engine_uninit(&engine);
     return NULL;
 }
  
@@ -41,30 +47,30 @@ pthread_t th1;
     didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
 		
 		
-/* 	result = ma_engine_init(NULL, &engine);
+	result = ma_engine_init(NULL, &engine);
 	if (result != MA_SUCCESS) {
 		printf("Failed to initialize audio engine.");
 		return -1;
 	}
 	
-	NSString *pathIOS1 = [[NSBundle mainBundle] pathForResource:@"JazzMIX.wav" ofType:nil];
+	pathIOS1 = [[NSBundle mainBundle] pathForResource:@"JazzMIX.wav" ofType:nil];
 	NSLog(pathIOS1);
 	
-	ma_engine_play_sound(&engine, pathIOS1, NULL);
-
-	ma_engine_uninit(&engine);
- 	 */
+	cStr = [pathIOS1 UTF8String];
+ 	
 		
-  InitDeviceMiniaudio();
+/*   InitDeviceMiniaudio();
   
-  // Add Wav
-  AddMusic("JazzMIX.wav");
+  // Add Mp3
+  AddMusic("bass.mp3");
+  AddMusic("drum.mp3");
+  AddMusic("piano.mp3");
    
   SetMasterVolume(1.0f);
-   
+   */
   // Execute thread
   pthread_create(&th1, NULL, worker, "ExecutePlayer");
-  
+
   [GeneratedPluginRegistrant registerWithRegistry:self];
   FlutterViewController* controller =
       (FlutterViewController*)self.window.rootViewController;
