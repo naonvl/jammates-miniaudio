@@ -53,10 +53,10 @@ pthread_t th1;
 		return -1;
 	}
 	
-	NSString *pathIOS1 = [[NSBundle mainBundle] pathForResource:@"JazzMIX.wav" ofType:nil];
+	pathIOS1 = [[NSBundle mainBundle] pathForResource:@"JazzMIX.wav" ofType:nil];
 	NSLog(pathIOS1);
 	
-	const char* cStr = [pathIOS1 UTF8String];
+	cStr = [pathIOS1 UTF8String];
  	
 		
 /*   InitDeviceMiniaudio();
