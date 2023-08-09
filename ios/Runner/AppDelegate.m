@@ -58,7 +58,8 @@ pthread_t th1;
   InitDeviceMiniaudio();
   
   // Add Wav
-  AddMusic("JazzMIX.wav");
+  AddMusic("bass.mp3");
+  //AddMusic("JazzMIX.wav");
    
   SetMasterVolume(1.0f);
    
