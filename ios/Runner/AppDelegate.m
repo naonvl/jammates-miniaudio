@@ -23,15 +23,20 @@
 
 ma_result result;
 ma_engine engine;
+NSString *pathIOS1 ;
+const char* cStr;
 
-/* void *worker(void *data)
+void *worker(void *data)
 {
-    ExecutePlayer();
+    //ExecutePlayer();
+	ma_engine_play_sound(&engine, cStr, NULL);
+
+	ma_engine_uninit(&engine);
     return NULL;
 }
  
 pthread_t th1;
- */
+
 
 @implementation AppDelegate {
   FlutterEventSink _eventSink;
@@ -52,9 +57,6 @@ pthread_t th1;
 	NSLog(pathIOS1);
 	
 	const char* cStr = [pathIOS1 UTF8String];
-	ma_engine_play_sound(&engine, cStr, NULL);
-
-	ma_engine_uninit(&engine);
  	
 		
 /*   InitDeviceMiniaudio();
@@ -65,10 +67,10 @@ pthread_t th1;
   AddMusic("piano.mp3");
    
   SetMasterVolume(1.0f);
-   
+   */
   // Execute thread
   pthread_create(&th1, NULL, worker, "ExecutePlayer");
-   */
+
   [GeneratedPluginRegistrant registerWithRegistry:self];
   FlutterViewController* controller =
       (FlutterViewController*)self.window.rootViewController;
