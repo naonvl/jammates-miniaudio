@@ -50,7 +50,8 @@ pthread_t th1;
 	NSString *pathIOS1 = [[NSBundle mainBundle] pathForResource:@"JazzMIX.wav" ofType:nil];
 	NSLog(pathIOS1);
 	
-	ma_engine_play_sound(&engine, pathIOS1, NULL);
+	const char* cStr = [pathIOS1 UTF8String];
+	ma_engine_play_sound(&engine, cStr, NULL);
 
 	ma_engine_uninit(&engine);
  	

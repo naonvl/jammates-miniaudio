@@ -64,7 +64,7 @@ void AddMusic(const char* path)
 	NSLog(pathIOS);
 	NSLog(@"/n"); */
 	
-	const char* cStr = [pathIOS1 UTF8String];
+	//const char* cStr = [pathIOS1 UTF8String];
 	
 	musicListTogether.music[ musicListTogether.indexToPlay[ musicListTogether.count ] ] = LoadMusicStream( cStr );
 	SetMusicVolume( musicListTogether.music[ musicListTogether.indexToPlay[ musicListTogether.count ] ], 1.0f );
