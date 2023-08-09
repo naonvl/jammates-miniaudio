@@ -12,6 +12,11 @@
 #include "iosAPI.c"
 
  */
+ 
+#define MA_NO_DECODING
+#define MA_NO_ENCODING
+#undef MA_NO_GENERATION
+
   #include "external/miniaudio.h"
 #include <stdio.h>
 #include <stdlib.h>
