@@ -8,23 +8,27 @@
 
 
 #define PLATFORM_IOS
-#include "iosAPI.h"
+/* #include "iosAPI.h"
 #include "iosAPI.c"
 
-
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <pthread.h>
  
-void *worker(void *data)
+
+ma_result result;
+ma_engine engine;
+
+/* void *worker(void *data)
 {
     ExecutePlayer();
     return NULL;
 }
  
 pthread_t th1;
-
+ */
 
 @implementation AppDelegate {
   FlutterEventSink _eventSink;
@@ -35,7 +39,21 @@ pthread_t th1;
     didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
 		
 		
-  InitDeviceMiniaudio();
+	result = ma_engine_init(NULL, &engine);
+	if (result != MA_SUCCESS) {
+		printf("Failed to initialize audio engine.");
+		return -1;
+	}
+	
+	NSString *pathIOS1 = [[NSBundle mainBundle] pathForResource:@"JazzMIX.wav" ofType:nil];
+	NSLog(pathIOS1);
+	
+	ma_engine_play_sound(&engine, pathIOS1, NULL);
+
+	ma_engine_uninit(&engine);
+ 	
+		
+/*   InitDeviceMiniaudio();
   
   // Add Mp3
   AddMusic("bass.mp3");
@@ -46,7 +64,7 @@ pthread_t th1;
    
   // Execute thread
   pthread_create(&th1, NULL, worker, "ExecutePlayer");
-  
+   */
   [GeneratedPluginRegistrant registerWithRegistry:self];
   FlutterViewController* controller =
       (FlutterViewController*)self.window.rootViewController;
@@ -77,14 +95,14 @@ pthread_t th1;
     }
   }];
   
-  StartPlayer();
+  //StartPlayer();
   
 ///////////////
   // LoadAudio
   [audioMethodChannel setMethodCallHandler:^(FlutterMethodCall* call,
                                          FlutterResult result) {
     if ([@"playSound" isEqualToString:call.method]) {
-		StartPlayer();
+		//StartPlayer();
     }
   }];
 
