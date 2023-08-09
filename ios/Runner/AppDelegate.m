@@ -8,12 +8,13 @@
 
 
 #define PLATFORM_IOS
+#define MINIAUDIO_IMPLEMENTATION
 /* #include "iosAPI.h"
 #include "iosAPI.c"
 
  */
  
- #include "external/miniaudio.h"
+#include "external/miniaudio.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
