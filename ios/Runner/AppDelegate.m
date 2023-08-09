@@ -58,8 +58,8 @@ pthread_t th1;
   InitDeviceMiniaudio();
   
   // Add Wav
-  AddMusic("bass.mp3");
-  //AddMusic("JazzMIX.wav");
+  //AddMusic("bass.mp3");
+  AddMusic("JazzMIX.wav");
    
   SetMasterVolume(1.0f);
    
@@ -103,7 +103,7 @@ pthread_t th1;
   [audioMethodChannel setMethodCallHandler:^(FlutterMethodCall* call,
                                          FlutterResult result) {
     if ([@"playSound" isEqualToString:call.method]) {
-		//StartPlayer();
+		StartPlayer();
     }
   }];
 
