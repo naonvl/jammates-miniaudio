@@ -42,13 +42,6 @@ ma_device_config deviceConfig;
 ma_device device;
 ma_waveform_config sineWaveConfig;
 
-deviceConfig = ma_device_config_init(ma_device_type_playback);
-deviceConfig.playback.format   = DEVICE_FORMAT;
-deviceConfig.playback.channels = DEVICE_CHANNELS;
-deviceConfig.sampleRate        = DEVICE_SAMPLE_RATE;
-deviceConfig.dataCallback      = data_callback;
-deviceConfig.pUserData         = &sineWave;
- 
 ma_result result;
 ma_engine engine;
 
@@ -85,6 +78,13 @@ pthread_t th1;
  	 */
 	 /////////////////////
 	 
+	deviceConfig = ma_device_config_init(ma_device_type_playback);
+	deviceConfig.playback.format   = DEVICE_FORMAT;
+	deviceConfig.playback.channels = DEVICE_CHANNELS;
+	deviceConfig.sampleRate        = DEVICE_SAMPLE_RATE;
+	deviceConfig.dataCallback      = data_callback;
+	deviceConfig.pUserData         = &sineWave;
+ 
     if (ma_device_init(NULL, &deviceConfig, &device) != MA_SUCCESS) {
         printf("Failed to open playback device.\n");
         return -4;
