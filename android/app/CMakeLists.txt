@@ -12,42 +12,42 @@ add_definitions( -DPLATFORM_ANDROID )
 # CPU Features
 add_library("cpufeatures" STATIC "${ANDROID_NDK}/sources/android/cpufeatures/cpu-features.c")
 
-add_library( # Sets the name of the library.
-        raudio
+# add_library( # Sets the name of the library.
+        # raudio
 
-        # Sets the library as a shared library.
-        STATIC
+        # # Sets the library as a shared library.
+        # STATIC
 
-        # Provides a relative path to your source file(s).
-        src/main/cpp/raudio.c
-        )
-add_library( # Sets the name of the library.
-        rtext
+        # # Provides a relative path to your source file(s).
+        # src/main/cpp/raudio.c
+        # )
+# add_library( # Sets the name of the library.
+        # rtext
 
-        # Sets the library as a shared library.
-        STATIC
+        # # Sets the library as a shared library.
+        # STATIC
 
-        # Provides a relative path to your source file(s).
-        src/main/cpp/external/utilities/rtext.c
-        )
-add_library( # Sets the name of the library.
-        utils
+        # # Provides a relative path to your source file(s).
+        # src/main/cpp/external/utilities/rtext.c
+        # )
+# add_library( # Sets the name of the library.
+        # utils
 
-        # Sets the library as a shared library.
-        STATIC
+        # # Sets the library as a shared library.
+        # STATIC
 
-        # Provides a relative path to your source file(s).
-        src/main/cpp/external/utilities/Android/utils.c
-        )
+        # # Provides a relative path to your source file(s).
+        # src/main/cpp/external/utilities/Android/utils.c
+        # )
 			
 add_library( # Sets the name of the library.
-        androidAPI
+        androidEntry
 
         # Sets the library as a shared library.
         SHARED
 
         # Provides a relative path to your source file(s).
-        src/main/cpp/androidAPI.c
+        src/main/cpp/main.c
         )
 
 find_library( # Sets the name of the path variable.
@@ -87,11 +87,11 @@ find_library( # Sets the name of the path variable.
         log)
 
 target_link_libraries( # Specifies the target library.
-        androidAPI
+        androidEntry
 
-		raudio
-		rtext
-		utils
+		# raudio
+		# rtext
+		# utils
 
 		${log-lib}
 		${android-lib}

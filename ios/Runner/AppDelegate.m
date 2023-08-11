@@ -8,56 +8,23 @@
 
 
 #define PLATFORM_IOS
-/* #include "iosAPI.h"
-#include "iosAPI.c"
+#include "../../miniaudio/IOSAPI/iosAPI.h"
+#include "../../miniaudio/IOSAPI/iosAPI.c"
 
- */
- 
-#define MA_NO_DECODING
-#define MA_NO_ENCODING
-#define MINIAUDIO_IMPLEMENTATION
 
-#include "external/miniaudio.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <pthread.h>
- 
- 
-#define DEVICE_FORMAT       ma_format_f32
-#define DEVICE_CHANNELS     2
-#define DEVICE_SAMPLE_RATE  48000
 
-void data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount)
-{
-    ma_waveform* pSineWave;
 
-    //MA_ASSERT(pDevice->playback.channels == DEVICE_CHANNELS);
-
-    pSineWave = (ma_waveform*)pDevice->pUserData;
-    //MA_ASSERT(pSineWave != NULL);
-
-    ma_waveform_read_pcm_frames(pSineWave, pOutput, frameCount, NULL);
-
-    (void)pInput;   /* Unused. */
-}
-
-ma_waveform sineWave;
-ma_device_config deviceConfig;
-ma_device device;
-ma_waveform_config sineWaveConfig;
-
-ma_result result;
-ma_engine engine;
-
-/* void *worker(void *data)
+void *worker(void *data)
 {
     ExecutePlayer();
     return NULL;
 }
  
 pthread_t th1;
- */
 
 @implementation AppDelegate {
   FlutterEventSink _eventSink;
@@ -68,49 +35,7 @@ pthread_t th1;
     didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
 		
 		
-/* 	result = ma_engine_init(NULL, &engine);
-	if (result != MA_SUCCESS) {
-		printf("Failed to initialize audio engine.");
-		return -1;
-	}
-	
-	NSString *pathIOS1 = [[NSBundle mainBundle] pathForResource:@"JazzMIX.wav" ofType:nil];
-	NSLog(pathIOS1);
-	
-	ma_engine_play_sound(&engine, pathIOS1, NULL);
-
-	ma_engine_uninit(&engine);
- 	 */
-	 /////////////////////
-	 
-	deviceConfig = ma_device_config_init(ma_device_type_playback);
-	deviceConfig.playback.format   = DEVICE_FORMAT;
-	deviceConfig.playback.channels = DEVICE_CHANNELS;
-	deviceConfig.sampleRate        = DEVICE_SAMPLE_RATE;
-	deviceConfig.dataCallback      = data_callback;
-	deviceConfig.pUserData         = &sineWave;
- 
-    if (ma_device_init(NULL, &deviceConfig, &device) != MA_SUCCESS) {
-        printf("Failed to open playback device.\n");
-        return -4;
-    }
-
-    printf("Device Name: %s\n", device.playback.name);
-
-    sineWaveConfig = ma_waveform_config_init(device.playback.format, device.playback.channels, device.sampleRate, ma_waveform_type_sine, 0.2, 220);
-    ma_waveform_init(&sineWaveConfig, &sineWave);
-
-    if (ma_device_start(&device) != MA_SUCCESS) {
-        printf("Failed to start playback device.\n");
-        ma_device_uninit(&device);
-        return -5;
-    }
-    
-    ma_device_uninit(&device);
-    
-	 ///////////
-		
-/*   InitDeviceMiniaudio();
+  InitDeviceMiniaudio();
   
   // Add Mp3
   AddMusic("bass.mp3");
@@ -121,7 +46,8 @@ pthread_t th1;
    
   // Execute thread
   pthread_create(&th1, NULL, worker, "ExecutePlayer");
-   */
+  
+  
   [GeneratedPluginRegistrant registerWithRegistry:self];
   FlutterViewController* controller =
       (FlutterViewController*)self.window.rootViewController;
@@ -152,14 +78,37 @@ pthread_t th1;
     }
   }];
   
-  //StartPlayer();
   
 ///////////////
-  // LoadAudio
+  // StartPlayer
   [audioMethodChannel setMethodCallHandler:^(FlutterMethodCall* call,
                                          FlutterResult result) {
     if ([@"playSound" isEqualToString:call.method]) {
-		//StartPlayer();
+		StartPlayer();
+    }
+  }];
+
+    // StopPlayer
+  [audioMethodChannel setMethodCallHandler:^(FlutterMethodCall* call,
+                                         FlutterResult result) {
+    if ([@"stopSound" isEqualToString:call.method]) {
+		StopPlayer();
+    }
+  }];
+
+    // PausePlayer
+  [audioMethodChannel setMethodCallHandler:^(FlutterMethodCall* call,
+                                         FlutterResult result) {
+    if ([@"pauseSound" isEqualToString:call.method]) {
+		PausePlayer();
+    }
+  }];
+
+      // ResumePlayer
+  [audioMethodChannel setMethodCallHandler:^(FlutterMethodCall* call,
+                                         FlutterResult result) {
+    if ([@"resumeSound" isEqualToString:call.method]) {
+		ResumePlayer();
     }
   }];
 
