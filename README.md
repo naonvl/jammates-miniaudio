@@ -3,8 +3,10 @@
 This project demonstrates how to connect a Flutter app to platform-specific services.
 And using miniaudio for audio module
 
-You can read more about
+You can read more about Flutter
 [accessing platform and third-party services in Flutter](https://flutter.dev/platform-channels/).
+
+You can read more about MiniAudio
 [accessing platform and third-party services in MiniAudio](https://miniaud.io/).
 
 ## iOS
