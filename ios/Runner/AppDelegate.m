@@ -93,43 +93,40 @@ pthread_t th1;
             } else if ([@"resumeSound" isEqualToString:call.method]) {
                 ResumePlayer();
                 result(@"ResumePlayer method invoked");
-            } else {
+            } else if ([@"setPitchAll" isEqualToString:call.method]) {
+			
+				float pitchSet = call.arguments[@"volume"];
+                SetPitchAll( volumeSet );
+                result(@"SetPitchAll method invoked");
+            } 
+			
+			else if ([@"updateDrumVolume" isEqualToString:call.method]) {
+			
+				float volumeSet = call.arguments[@"volume"];
+                SetVolumeForMusic( "audio/drum.mp3", volumeSet );
+                result(@"updateDrumVolume method invoked");
+            } 
+			
+			else if ([@"updateBassVolume" isEqualToString:call.method]) {
+			
+				float volumeSet = call.arguments[@"volume"];
+                SetVolumeForMusic( "audio/bass.mp3", volumeSet );
+                result(@"updateBassVolume method invoked");
+            } 
+			
+			else if ([@"updatePianoVolume" isEqualToString:call.method]) {
+			
+				float volumeSet = call.arguments[@"volume"];
+                SetVolumeForMusic( "audio/piano.mp3", volumeSet );
+                result(@"updatePianoVolume method invoked");
+            } 
+			
+			else {
                 result(FlutterMethodNotImplemented);
             }
         }
     }];
-//    [audioMethodChannel setMethodCallHandler:^(FlutterMethodCall* call,
-//                                             FlutterResult result) {
-//        StartPlayer();
-//        if ([@"playSound" isEqualToString:call.method]) {
-//            StartPlayer();
-//        }
-//    }];
-//
-//
-//    // StopPlayer
-//  [audioMethodChannel setMethodCallHandler:^(FlutterMethodCall* call,
-//                                         FlutterResult result) {
-//    if ([@"stopSound" isEqualToString:call.method]) {
-//		StopPlayer();
-//    }
-//  }];
-//
-//    // PausePlayer
-//  [audioMethodChannel setMethodCallHandler:^(FlutterMethodCall* call,
-//                                         FlutterResult result) {
-//    if ([@"pauseSound" isEqualToString:call.method]) {
-//		PausePlayer();
-//    }
-//  }];
-//
-//      // ResumePlayer
-//  [audioMethodChannel setMethodCallHandler:^(FlutterMethodCall* call,
-//                                         FlutterResult result) {
-//    if ([@"resumeSound" isEqualToString:call.method]) {
-//		ResumePlayer();
-//    }
-//  }];
+
 
   
 //////////////////
@@ -152,6 +149,7 @@ pthread_t th1;
 {
     // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
     // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
+	PausePlayer();
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)application 
