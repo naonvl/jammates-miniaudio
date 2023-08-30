@@ -63,6 +63,28 @@ public class MiniAudioPlayer {
 		AddMusicStream( pathName );
 
 	}
+		
+	public void AddMusicStreamToPlayFromStorage(String pathName) // 
+	{
+		if( indexMusic >= 12 ) // For now harddoced
+			return;
+			
+		Log.v(TAG, "AddMusicStreamToPlayFromStorage(String pathName)");
+		if(reservedPos.size() > 0)
+		{
+			musicList.put(pathName, reservedPos.get( 0 ) );
+			reservedPos.remove( 0 );
+		}
+		else
+		{
+			musicList.put(pathName, indexMusic);
+		}
+		indexMusic++;
+		
+		Log.v(TAG, "AddMusicStreamFromStorage( pathName );");
+		AddMusicStreamFromStorage( pathName );
+
+	}
 	
 	public void RemoveMusicStreamFromPlay(String pathName) // 
 	{
@@ -131,6 +153,7 @@ public class MiniAudioPlayer {
 
 	public native void SetIsClosed(int value);
 	public native void AddMusicStream(String pathName);
+	public native void AddMusicStreamFromStorage(String pathName);
 	public native void RemoveMusicStream(int pos);
 	public native void CleanResource();
 	public native void InitMiniaudio();

@@ -20,22 +20,6 @@ public class MainActivity extends FlutterActivity {
 	
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
-//        super.onCreate(savedInstanceState);
-//
-//		/// Init the Miniaudio player
-//		miniAudioPlayer = new MiniAudioPlayer( this );
-//
-//		// Start audio thread
-//		miniAudioPlayer.StartAudioThread();
-//
-//		/// Add music together
-//		miniAudioPlayer.AddMusicStreamToPlay("audio/bass.mp3");
-//		miniAudioPlayer.AddMusicStreamToPlay("audio/drum.mp3");
-//		miniAudioPlayer.AddMusicStreamToPlay("audio/piano.mp3");
-//
-//		///
-//		//miniAudioPlayer.SetPitchAllAudio( 2.0f );
-//
         super.onCreate(savedInstanceState);
 
         miniAudioPlayer = new MiniAudioPlayer(this);
@@ -58,15 +42,22 @@ public class MainActivity extends FlutterActivity {
 
                     }
                     Log.d("TAG", "initPlayer: STARTED");
+                    break;                
+				case "addMp3FromStorage":
+                    // Initialize your player here based on audio tracks received from Flutter
+                    String audioTrack = call.argument("audioTrack");
+                    miniAudioPlayer.AddMusicStreamToPlayFromStorage(audioTrack);
+					
+                    Log.d("TAG", "addMp3FromStorage: STARTED");
                     break;
                 case "playSound":
-                    Log.d("TAG", "Play sound: " + call.argument("text"));
+                    Log.d("TAG", "Play sound: " + call.argument("filePath"));
 					
 					miniAudioPlayer.PlayAllAudio();
 					
                     break;
                 case "stopSound":
-                    Log.d("TAG", "Stop sound: " + call.argument("text"));
+                    Log.d("TAG", "Stop sound: " + call.argument("filePath"));
 					
 					miniAudioPlayer.StopAllAudio();
 					

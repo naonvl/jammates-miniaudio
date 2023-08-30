@@ -105,6 +105,17 @@ class _MyHomePageState extends State<MyHomePage> {
     super.dispose();
   }
 
+  ///////////////////////////////////
+  /// Imandana's code sample
+  /// 
+  void _addMp3sFromStorage()
+  {
+	for (String mp3File in _audioPaths) {
+		 _methodChannel.invokeMethod("addMp3FromStorage", {"audioTrack": mp3File});
+    }
+  }
+  ////////////////////////////////// Imandana's code
+  
   void _updateTrackVolume(int index, double value) {
     String trackName = _audioTracks[index];
     setState(() {
