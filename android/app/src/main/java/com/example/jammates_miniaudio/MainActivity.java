@@ -2,7 +2,7 @@ package com.example.jammates;
 
 import android.os.Bundle;
 import android.util.Log;
-
+import java.util.List;
 import androidx.annotation.NonNull;
 
 import io.flutter.embedding.android.FlutterActivity;
@@ -20,23 +20,26 @@ public class MainActivity extends FlutterActivity {
 	
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
+//        super.onCreate(savedInstanceState);
+//
+//		/// Init the Miniaudio player
+//		miniAudioPlayer = new MiniAudioPlayer( this );
+//
+//		// Start audio thread
+//		miniAudioPlayer.StartAudioThread();
+//
+//		/// Add music together
+//		miniAudioPlayer.AddMusicStreamToPlay("audio/bass.mp3");
+//		miniAudioPlayer.AddMusicStreamToPlay("audio/drum.mp3");
+//		miniAudioPlayer.AddMusicStreamToPlay("audio/piano.mp3");
+//
+//		///
+//		//miniAudioPlayer.SetPitchAllAudio( 2.0f );
+//
         super.onCreate(savedInstanceState);
 
-		/// Init the Miniaudio player
-		miniAudioPlayer = new MiniAudioPlayer( this );
-		
-		// Start audio thread
-		miniAudioPlayer.StartAudioThread();
-
-		/// Add music together
-		miniAudioPlayer.AddMusicStreamToPlay("audio/bass.mp3");
-		miniAudioPlayer.AddMusicStreamToPlay("audio/drum.mp3");
-		miniAudioPlayer.AddMusicStreamToPlay("audio/piano.mp3");
-		
-		/// 
-		//miniAudioPlayer.SetPitchAllAudio( 2.0f );
-		
-		
+        miniAudioPlayer = new MiniAudioPlayer(this);
+        miniAudioPlayer.StartAudioThread();
     }
 	
     @Override
@@ -47,6 +50,15 @@ public class MainActivity extends FlutterActivity {
         methodChannel = new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), "method_channel");
         methodChannel.setMethodCallHandler((call, result) -> {
             switch (call.method) {
+                case "initPlayer":
+                    // Initialize your player here based on audio tracks received from Flutter
+                    List<String> audioTracks = call.argument("audioTracks");
+                    for (String track : audioTracks) {
+                        miniAudioPlayer.AddMusicStreamToPlay("audio/" + track + ".mp3");
+
+                    }
+                    Log.d("TAG", "initPlayer: STARTED");
+                    break;
                 case "playSound":
                     Log.d("TAG", "Play sound: " + call.argument("text"));
 					

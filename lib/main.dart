@@ -41,6 +41,8 @@ class _MyHomePageState extends State<MyHomePage> {
   Map<String, double> _tempTrackVolumes = {};
   Map<String, double> _trackVolumes = {};
   String selectedOption = 'Medium';
+  int _currentBpm = 100;
+  int _mediumBpm = 100;
   void _togglePlay() {
     if (!_isPlaying) {
       _methodChannel
@@ -57,7 +59,8 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-
+    _methodChannel
+        .invokeMethod("initPlayer", {"audioTracks": _audioTracks.toString()});
     // Initialize solo states and track volumes based on _audioTracks
     for (String track in _audioTracks) {
       downloadAndSaveFile(
@@ -75,7 +78,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<String> downloadAndSaveFile(String url, String filename) async {
-    Directory dir = await getApplicationDocumentsDirectory();
+    Directory dir = await getApplicationSupportDirectory();
     String path = '${dir.path}/$filename';
     File file = File(path);
 
@@ -150,7 +153,18 @@ class _MyHomePageState extends State<MyHomePage> {
                       showModalBottomSheet(
                         context: context,
                         builder: (BuildContext context) {
-                          return MyBottomSheet();
+                          return MyBottomSheet(
+                            selectedOption: selectedOption,
+                            currentBpm: _currentBpm,
+                            mediumBpm: _mediumBpm,
+                            onUpdate: (newOption, newBpm) {
+                              print(newOption);
+                              setState(() {
+                                selectedOption = newOption;
+                                _currentBpm = newBpm;
+                              });
+                            },
+                          );
                         },
                       );
                     },
@@ -260,6 +274,18 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class MyBottomSheet extends StatefulWidget {
+  final String selectedOption;
+  final int currentBpm;
+  final int mediumBpm;
+  final Function(String, int) onUpdate;
+
+  MyBottomSheet({
+    required this.selectedOption,
+    required this.currentBpm,
+    required this.mediumBpm,
+    required this.onUpdate
+  });
+
   @override
   _MyBottomSheetState createState() => _MyBottomSheetState();
 }
@@ -268,7 +294,18 @@ class _MyBottomSheetState extends State<MyBottomSheet> {
   String selectedOption = 'Medium';
   int bpm = 120;
   double sliderValue = 120.0;
-
+  @override
+  void initState() {
+    super.initState();
+    selectedOption = widget.selectedOption;
+    bpm = widget.currentBpm;
+    sliderValue = widget.currentBpm.toDouble();
+  }
+  void _updateValues() {
+    setState(() {
+      widget.onUpdate(selectedOption, bpm);
+    });
+  }
   void incrementBpm() {
     setState(() {
       if (bpm < 160) {
@@ -306,6 +343,7 @@ class _MyBottomSheetState extends State<MyBottomSheet> {
               icon: Icon(Icons.close),
               onPressed: () {
                 Navigator.of(context).pop();
+                _updateValues();
               },
             ),
           ),
@@ -331,6 +369,7 @@ class _MyBottomSheetState extends State<MyBottomSheet> {
                     selectedOption = 'Slow';
                     sliderValue = 80;
                     bpm = 80;
+                    _updateValues();
                   });
                 },
                 child: Text('Slow'),
@@ -352,8 +391,8 @@ class _MyBottomSheetState extends State<MyBottomSheet> {
                 onPressed: () {
                   setState(() {
                     selectedOption = 'Medium';
-                    sliderValue = 120;
-                    bpm = 120;
+                    sliderValue = widget.mediumBpm.toDouble();
+                    bpm = widget.mediumBpm;
                   });
                 },
                 child: Text('Medium'),
