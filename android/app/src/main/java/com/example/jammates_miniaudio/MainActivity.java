@@ -74,6 +74,16 @@ public class MainActivity extends FlutterActivity {
 					miniAudioPlayer.ResumeAllAudio();
 					
                 break;
+
+				////////////////////
+                case "updateMusicVolume":
+                    float volume = call.argument("volume");
+                    int position = call.argument("index");
+                    Log.d("TAG", "volume updated: " + volume);
+					
+					miniAudioPlayer.SetMusicVolumeOf(position, volume);
+                    break;
+				///////////////////
                 case "updateDrumVolume":
                     float drumVolume = call.argument("volume");
                     Log.d("TAG", "Drum volume updated: " + drumVolume);

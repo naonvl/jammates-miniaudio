@@ -114,6 +114,13 @@ class _MyHomePageState extends State<MyHomePage> {
 		 _methodChannel.invokeMethod("addMp3FromStorage", {"audioTrack": mp3File});
     }
   }
+
+ /// Set directly the volume from index, 
+ /// Look at MainActivity.java in case "updateMusicVolume":
+  void _updateTrackVolumeEx(int index, double value) {
+    _methodChannel.invokeMethod("updateMusicVolume",
+        { "index": index,"volume": value } );
+  }
   ////////////////////////////////// Imandana's code
   
   void _updateTrackVolume(int index, double value) {

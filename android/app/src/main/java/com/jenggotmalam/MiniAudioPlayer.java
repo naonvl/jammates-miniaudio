@@ -105,6 +105,11 @@ public class MiniAudioPlayer {
 		
 		SetVolumeForMusic(pos, vol);
 	}
+
+	public void SetMusicVolumeOf(int pos, float vol)
+	{
+		SetVolumeForMusic(pos, vol);
+	}
 	
 	public void StartAudioThread()
 	{
