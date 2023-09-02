@@ -23,6 +23,7 @@ public class MiniAudioPlayer {
 		Log.v(TAG,  activity.getFilesDir().getPath() );
 		InitAssetManagerMini(activity.getResources().getAssets() , activity.getFilesDir().getPath() );
 		
+		Log.v(TAG, activity.getFilesDir().getPath() );
 		Log.v(TAG, "InitMiniaudio");
 		InitMiniaudio();
 		
@@ -103,11 +104,6 @@ public class MiniAudioPlayer {
 	{
 		int pos = musicList.get( pathName );
 		
-		SetVolumeForMusic(pos, vol);
-	}
-
-	public void SetMusicVolumeOf(int pos, float vol)
-	{
 		SetVolumeForMusic(pos, vol);
 	}
 	

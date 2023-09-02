@@ -46,40 +46,48 @@ class _MyHomePageState extends State<MyHomePage> {
   void _togglePlay() {
     if (!_isPlaying) {
       _methodChannel
-          .invokeMethod("playSound", {"filePath": _audioPaths.toString()});
+          .invokeMethod("playSound");
     } else {
       _methodChannel
-          .invokeMethod("stopSound", {"filePath": _audioPaths.toString()});
+          .invokeMethod("stopSound");
     }
     setState(() {
       _isPlaying = !_isPlaying;
     });
   }
+  bool isInitPlayerInvoked = false; // Flag to track if initPlayer has been invoked
 
   @override
   void initState() {
     super.initState();
-    _methodChannel
-        .invokeMethod("initPlayer", {"audioTracks": _audioTracks.toString()});
     // Initialize solo states and track volumes based on _audioTracks
+
     for (String track in _audioTracks) {
       downloadAndSaveFile(
-              'https://github.com/naonvl/vespa-configurator-playcanvas/blob/main/' +
-                  track +
-                  '.mp3',
-              track + '.mp3')
-          .then((path) {
+        'https://raw.githubusercontent.com/naonvl/vespa-configurator-playcanvas/main/' +
+            track +
+            '.mp3',
+        track + '.mp3',
+      ).then((path) {
         _audioPaths.add(path);
+		print('[downloadAndSaveFile] File saved at $path');
+        if (!isInitPlayerInvoked) {
+          _methodChannel.invokeMethod("initPlayer", {"audioTracks": _audioTracks});
+          isInitPlayerInvoked = true; // Set the flag to true after invoking initPlayer
+        }
       });
+
       _soloStates[track] = false;
       _tempTrackVolumes[track] = 1.0;
       _trackVolumes[track] = 1.0;
+
+
     }
   }
-
-  Future<String> downloadAndSaveFile(String url, String filename) async {
-    Directory dir = await getApplicationSupportDirectory();
-    String path = '${dir.path}/$filename';
+  // /STORAGE
+/*   Future<String> downloadAndSaveFile(String url, String filename) async {
+    Directory? dir = await getExternalStorageDirectory();
+    String path = '${dir?.path}/$filename';
     File file = File(path);
 
     if (await file.exists()) {
@@ -97,7 +105,29 @@ class _MyHomePageState extends State<MyHomePage> {
     } else {
       throw Exception('Failed to download file');
     }
-  }
+  } */
+  // /DATA/
+   Future<String> downloadAndSaveFile(String url, String filename) async {
+     Directory dir = await getApplicationSupportDirectory();
+     String path = '${dir.path}/$filename';
+     File file = File(path);
+  
+     if (await file.exists()) {
+       print('File already exists at $path');
+       return path;
+     }
+  
+     var response = await http.get(Uri.parse(url));
+  
+     if (response.statusCode == 200) {
+       var bytes = response.bodyBytes;
+       await file.writeAsBytes(bytes);
+       print('[Iman] File saved at $path');
+       return path;
+     } else {
+       throw Exception('[Iman] Failed to download file');
+     }
+   }
 
   @override
   void dispose() {
@@ -113,13 +143,6 @@ class _MyHomePageState extends State<MyHomePage> {
 	for (String mp3File in _audioPaths) {
 		 _methodChannel.invokeMethod("addMp3FromStorage", {"audioTrack": mp3File});
     }
-  }
-
- /// Set directly the volume from index, 
- /// Look at MainActivity.java in case "updateMusicVolume":
-  void _updateTrackVolumeEx(int index, double value) {
-    _methodChannel.invokeMethod("updateMusicVolume",
-        { "index": index,"volume": value } );
   }
   ////////////////////////////////// Imandana's code
   

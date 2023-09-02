@@ -1,4 +1,4 @@
-# jammates_miniaudio
+# my_app
 
 A new Flutter project.
 
