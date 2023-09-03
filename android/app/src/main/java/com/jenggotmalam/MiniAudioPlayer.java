@@ -42,6 +42,13 @@ public class MiniAudioPlayer {
 					 });
     }
 
+	public void ResetList()
+	{
+		indexMusic = 0;
+		reservedPos = new ArrayList<Integer>(); 
+		ResetListAndUnload();
+	}
+	
 	public void AddMusicStreamToPlay(String pathName) // 
 	{
 		if( indexMusic >= 12 ) // For now harddoced
@@ -167,6 +174,7 @@ public class MiniAudioPlayer {
 	public native void ResumeMiniaudio();
 	
 	public native void SetVolumeForMusic(int pos, float vol);
+	public native void ResetListAndUnload();
 	
 	public native void StartThreadMiniaudio();
 

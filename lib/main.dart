@@ -35,59 +35,92 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final _methodChannel = const MethodChannel("method_channel");
   bool _isPlaying = false;
+  bool _isFirstPlaying = true;
+  bool isInitialized = false;
+  bool _isDownloading = true;
   List<String> _audioTracks = ['drum', 'bass', 'piano'];
   List<String> _audioPaths = [];
   Map<String, bool> _soloStates = {};
   Map<String, double> _tempTrackVolumes = {};
   Map<String, double> _trackVolumes = {};
-  String selectedOption = 'Medium';
+  String selectedOption = 'medium';
   int _currentBpm = 100;
   int _mediumBpm = 100;
+
   void _togglePlay() {
-    if (!_isPlaying) {
-      _methodChannel
-          .invokeMethod("playSound");
+    if (_isFirstPlaying && !_isPlaying) {
+      _methodChannel.invokeMethod("playSound");
+      setState(() {
+        _isFirstPlaying = false;
+      });
+    } else if (!_isFirstPlaying && !_isPlaying) {
+      _methodChannel.invokeMethod("resumeSound");
+    } else if (!_isFirstPlaying && _isPlaying) {
+      _methodChannel.invokeMethod("pauseSound");
     } else {
-      _methodChannel
-          .invokeMethod("stopSound");
+      _methodChannel.invokeMethod("stopSound");
     }
     setState(() {
       _isPlaying = !_isPlaying;
     });
   }
-  bool isInitPlayerInvoked = false; // Flag to track if initPlayer has been invoked
+
+  bool isInitPlayerInvoked = false;
 
   @override
   void initState() {
     super.initState();
-    // Initialize solo states and track volumes based on _audioTracks
-
-    for (String track in _audioTracks) {
-      downloadAndSaveFile(
-        'https://raw.githubusercontent.com/naonvl/vespa-configurator-playcanvas/main/' +
-            track +
-            '.mp3',
-        track + '.mp3',
-      ).then((path) {
-        _audioPaths.add(path);
-		print('[downloadAndSaveFile] File saved at $path');
+    if (!isInitialized) {
+      isInitialized = true;
+      initPlayer().then((value) {
         if (!isInitPlayerInvoked) {
-          _methodChannel.invokeMethod("initPlayer", {"audioTracks": _audioTracks});
-          isInitPlayerInvoked = true; // Set the flag to true after invoking initPlayer
+          downloadAndInitializePlayer(selectedOption).then((_) {
+            print('====== STARTED ======');
+            setState(() {
+              _isDownloading = false;
+              isInitPlayerInvoked = true;
+            });
+            _methodChannel
+                .invokeMethod("initPlayer", {"audioTracks": _audioTracks});
+          });
         }
       });
+    }
+  }
 
+  Future<void> downloadAndInitializePlayer(String selectedOption) async {
+    List<String> tracksToDownload = [];
+
+    for (String track in _audioTracks) {
+      if (!_audioPaths.contains(track + '.mp3')) {
+        tracksToDownload.add(track);
+      }
+    }
+
+    List<String> paths =
+        await Future.wait(tracksToDownload.map((track) => downloadAndSaveFile(
+              'https://raw.githubusercontent.com/naonvl/vespa%2Dconfigurator%2Dplaycanvas/main/' +
+                  track +
+                  "-" +
+                  selectedOption[0] +
+                  '.mp3',
+              track + "-" + selectedOption[0] + '.mp3',
+            )));
+
+    _audioPaths.addAll(paths);
+  }
+
+  Future initPlayer() async {
+    for (String track in _audioTracks) {
       _soloStates[track] = false;
       _tempTrackVolumes[track] = 1.0;
       _trackVolumes[track] = 1.0;
-
-
     }
   }
-  // /STORAGE
-/*   Future<String> downloadAndSaveFile(String url, String filename) async {
-    Directory? dir = await getExternalStorageDirectory();
-    String path = '${dir?.path}/$filename';
+
+  Future<String> downloadAndSaveFile(String url, String filename) async {
+    Directory dir = await getApplicationSupportDirectory();
+    String path = '${dir.path}/$filename';
     File file = File(path);
 
     if (await file.exists()) {
@@ -105,68 +138,49 @@ class _MyHomePageState extends State<MyHomePage> {
     } else {
       throw Exception('Failed to download file');
     }
-  } */
-  // /DATA/
-   Future<String> downloadAndSaveFile(String url, String filename) async {
-     Directory dir = await getApplicationSupportDirectory();
-     String path = '${dir.path}/$filename';
-     File file = File(path);
-  
-     if (await file.exists()) {
-       print('File already exists at $path');
-       return path;
-     }
-  
-     var response = await http.get(Uri.parse(url));
-  
-     if (response.statusCode == 200) {
-       var bytes = response.bodyBytes;
-       await file.writeAsBytes(bytes);
-       print('[Iman] File saved at $path');
-       return path;
-     } else {
-       throw Exception('[Iman] Failed to download file');
-     }
-   }
+  }
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
   }
 
-  ///////////////////////////////////
-  /// Imandana's code sample
-  /// 
-  void _addMp3sFromStorage()
-  {
-	for (String mp3File in _audioPaths) {
-		 _methodChannel.invokeMethod("addMp3FromStorage", {"audioTrack": mp3File});
-    }
-  }
-  ////////////////////////////////// Imandana's code
-  
   void _updateTrackVolume(int index, double value) {
     String trackName = _audioTracks[index];
     setState(() {
       _trackVolumes[trackName] = value;
     });
-    _methodChannel.invokeMethod("update${indexToPosition(index + 1)}Volume",
-        {"volume": _tempTrackVolumes[trackName]});
+    _methodChannel.invokeMethod("updateVolume",
+        {"volume": _trackVolumes[trackName], "trackName": trackName});
   }
 
-  String indexToPosition(int index) {
-    switch (index) {
-      case 1:
-        return 'First';
-      case 2:
-        return 'Second';
-      case 3:
-        return 'Third';
-      // Add more cases as needed
-      default:
-        return 'Unknown';
-    }
+  void _setSolo(String track) {
+    setState(() {
+      if (_soloStates[track] == false) {
+        _trackVolumes[track] = 1;
+        for (String otherTrack in _audioTracks) {
+          if (otherTrack != track) {
+            _soloStates[otherTrack] = false;
+            _tempTrackVolumes[otherTrack] = _trackVolumes[otherTrack]!;
+            _trackVolumes[otherTrack] = 0;
+            _methodChannel.invokeMethod("updateVolume",
+                {"volume": _trackVolumes[otherTrack], "trackName": otherTrack});
+          } else {
+            _methodChannel.invokeMethod("updateVolume",
+                {"volume": _trackVolumes[track], "trackName": track});
+          }
+        }
+      } else {
+        for (String otherTrack in _audioTracks) {
+          if (otherTrack != track) {
+            _trackVolumes[otherTrack] = 1;
+            _methodChannel.invokeMethod("updateVolume",
+                {"volume": _trackVolumes[otherTrack], "trackName": otherTrack});
+          }
+        }
+      }
+      _soloStates[track] = !_soloStates[track]!;
+    });
   }
 
   @override
@@ -182,37 +196,59 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Row(
-                children: [
-                  ElevatedButton(
-                    onPressed: _togglePlay,
-                    child: Text(_isPlaying ? 'Pause' : 'Play'),
-                  ),
-                  SizedBox(width: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      showModalBottomSheet(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return MyBottomSheet(
-                            selectedOption: selectedOption,
-                            currentBpm: _currentBpm,
-                            mediumBpm: _mediumBpm,
-                            onUpdate: (newOption, newBpm) {
-                              print(newOption);
-                              setState(() {
-                                selectedOption = newOption;
-                                _currentBpm = newBpm;
-                              });
-                            },
-                          );
-                        },
-                      );
-                    },
-                    child: Text('TEMPO'),
-                  )
-                ],
-              ),
+              _isDownloading
+                  ? Container(
+                      width: double.infinity,
+                      child: const Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircularProgressIndicator(),
+                          SizedBox(
+                            height: 20,
+                          ),
+                          Text('LOADING MP3 FILES'),
+                        ],
+                      ),
+                    )
+                  : Row(
+                      children: [
+                        ElevatedButton(
+                          onPressed: _togglePlay,
+                          child: Text(_isPlaying ? 'Pause' : 'Play'),
+                        ),
+                        SizedBox(width: 20),
+                        ElevatedButton(
+                          onPressed: () {
+                            showModalBottomSheet(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return MyBottomSheet(
+                                  selectedOption: selectedOption,
+                                  currentBpm: _currentBpm,
+                                  mediumBpm: _mediumBpm,
+                                  onUpdate: (newOption, newBpm) {
+                                    setState(() {
+                                      _currentBpm = newBpm;
+                                    });
+                                    if (selectedOption == newOption) return;
+                                    setState(() {
+                                      selectedOption = newOption;
+                                      _isDownloading = true;
+                                      downloadAndInitializePlayer(newOption)
+                                          .then((value) {
+                                        _isDownloading = false;
+                                      });
+                                    });
+                                  },
+                                );
+                              },
+                            );
+                          },
+                          child: Text('TEMPO'),
+                        )
+                      ],
+                    ),
               SizedBox(height: 20),
               Column(
                 children: _audioTracks.asMap().entries.map((entry) {
@@ -224,7 +260,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: <Widget>[
                           Text(
-                            track, // Assuming you have the capitalize function
+                            track,
                             style: Theme.of(context).textTheme.headline6,
                           ),
                           Row(
@@ -257,26 +293,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               SizedBox(width: 10),
                               ElevatedButton(
                                 onPressed: () {
-                                  setState(() {
-                                    if (_soloStates[track] == false) {
-                                      _trackVolumes[track] = 1;
-                                      for (String otherTrack in _audioTracks) {
-                                        if (otherTrack != track) {
-                                          _soloStates[otherTrack] = false;
-                                          _tempTrackVolumes[otherTrack] =
-                                              _trackVolumes[otherTrack]!;
-                                          _trackVolumes[otherTrack] = 0;
-                                        }
-                                      }
-                                    } else {
-                                      for (String otherTrack in _audioTracks) {
-                                        if (otherTrack != track) {
-                                          _trackVolumes[otherTrack] = 1;
-                                        }
-                                      }
-                                    }
-                                    _soloStates[track] = !_soloStates[track]!;
-                                  });
+                                  _setSolo(track);
                                 },
                                 style: ElevatedButton.styleFrom(
                                   primary: _soloStates[track] == true
@@ -298,8 +315,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         value: _trackVolumes[track]!,
                         min: 0,
                         max: 1,
-                        onChanged: (value) =>
-                            _updateTrackVolume(index, value), // Pass the index
+                        onChanged: (value) => _updateTrackVolume(index, value),
                       ),
                       SizedBox(height: 20),
                     ],
@@ -320,19 +336,18 @@ class MyBottomSheet extends StatefulWidget {
   final int mediumBpm;
   final Function(String, int) onUpdate;
 
-  MyBottomSheet({
-    required this.selectedOption,
-    required this.currentBpm,
-    required this.mediumBpm,
-    required this.onUpdate
-  });
+  MyBottomSheet(
+      {required this.selectedOption,
+      required this.currentBpm,
+      required this.mediumBpm,
+      required this.onUpdate});
 
   @override
   _MyBottomSheetState createState() => _MyBottomSheetState();
 }
 
 class _MyBottomSheetState extends State<MyBottomSheet> {
-  String selectedOption = 'Medium';
+  String selectedOption = 'medium';
   int bpm = 120;
   double sliderValue = 120.0;
   @override
@@ -342,11 +357,13 @@ class _MyBottomSheetState extends State<MyBottomSheet> {
     bpm = widget.currentBpm;
     sliderValue = widget.currentBpm.toDouble();
   }
+
   void _updateValues() {
     setState(() {
       widget.onUpdate(selectedOption, bpm);
     });
   }
+
   void incrementBpm() {
     setState(() {
       if (bpm < 160) {
@@ -419,9 +436,9 @@ class _MyBottomSheetState extends State<MyBottomSheet> {
                 style: ElevatedButton.styleFrom(
                   elevation: 0,
                   primary:
-                      selectedOption == 'Medium' ? Colors.blue : Colors.white,
+                      selectedOption == 'medium' ? Colors.blue : Colors.white,
                   onPrimary:
-                      selectedOption == 'Medium' ? Colors.white : Colors.grey,
+                      selectedOption == 'medium' ? Colors.white : Colors.grey,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.0),
                     side: BorderSide(
@@ -431,12 +448,12 @@ class _MyBottomSheetState extends State<MyBottomSheet> {
                 ),
                 onPressed: () {
                   setState(() {
-                    selectedOption = 'Medium';
+                    selectedOption = 'medium';
                     sliderValue = widget.mediumBpm.toDouble();
                     bpm = widget.mediumBpm;
                   });
                 },
-                child: Text('Medium'),
+                child: Text('medium'),
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(

@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.util.Log;
 import java.util.List;
 import androidx.annotation.NonNull;
-
+import java.util.ArrayList; 
 import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.plugin.common.MethodCall;
@@ -25,7 +25,7 @@ public class MainActivity extends FlutterActivity {
         miniAudioPlayer = new MiniAudioPlayer(this);
         miniAudioPlayer.StartAudioThread();
     }
-	
+	List<String> audioTracks = new ArrayList<>();
     @Override
     public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
         super.configureFlutterEngine(flutterEngine);
@@ -41,9 +41,14 @@ public class MainActivity extends FlutterActivity {
                     //List<String> audioTracks = call.argument("audioTracks");
 					Log.d("TAG", "switch (call.method) {");
 					Log.d("TAG", "List<String> audioTracks :" + call.argument("audioTracks") );
-                    List<String> audioTracks = (List<String>)call.argument("audioTracks");
+                    audioTracks = (List<String>)call.argument("audioTracks");
 					
 					Log.d("TAG", "List<String> audioTracks :" + audioTracks.get(0) );
+					
+					// Reset First the array
+					miniAudioPlayer.ResetList();
+					///
+					
                     for (String track : audioTracks) {
                         miniAudioPlayer.AddMusicStreamToPlay(track + ".mp3");
 
@@ -81,29 +86,16 @@ public class MainActivity extends FlutterActivity {
 					miniAudioPlayer.ResumeAllAudio();
 					
                 break;
-                case "updateDrumVolume":
-                    float drumVolume = call.argument("volume");
-                    Log.d("TAG", "Drum volume updated: " + drumVolume);
-					
-					miniAudioPlayer.SetMusicVolumeOf("audio/drum.mp3", drumVolume);
-                    break;
-                case "updateBassVolume":
-                    float bassVolume = call.argument("volume");
-                    Log.d("TAG", "Bass volume updated: " + bassVolume);
-					
-					miniAudioPlayer.SetMusicVolumeOf("audio/bass.mp3", bassVolume);
-                    break;
-                case "updatePianoVolume":
-                    float pianoVolume = call.argument("volume");
-                    Log.d("TAG", "Piano volume updated: " + pianoVolume);
-					
-					miniAudioPlayer.SetMusicVolumeOf("audio/piano.mp3", pianoVolume);
-                    break;
-					
+                case "updateVolume":
+                    String trackName = call.argument("trackName");
+                    float volume = ((Number) call.argument("volume")).floatValue();
+                    Log.d("TAG", trackName + " volume updated: " + volume);
+                    String audioFilePath =  trackName + ".mp3";
+                    miniAudioPlayer.SetMusicVolumeOf(audioFilePath, volume);
+                break;
 				case "setPitch":
                     float pitch = call.argument("pitch");
                     Log.d("TAG", "Pitch volume updated: " + pitch);
-					
 					miniAudioPlayer.SetPitchAllAudio( pitch );
                     break;
 					
