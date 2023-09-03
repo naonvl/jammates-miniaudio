@@ -45,6 +45,7 @@ public class MiniAudioPlayer {
 	public void ResetList()
 	{
 		indexMusic = 0;
+		musicList = new HashMap<String, Integer>();
 		reservedPos = new ArrayList<Integer>(); 
 		ResetListAndUnload();
 	}
