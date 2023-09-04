@@ -80,8 +80,8 @@ class _MyHomePageState extends State<MyHomePage> {
               _isDownloading = false;
               isInitPlayerInvoked = true;
             });
-            _methodChannel
-                .invokeMethod("initPlayer", {"audioTracks": _audioTracks});
+            _methodChannel.invokeMethod("initPlayer",
+                {"audioTracks": _audioTracks, "tempo": selectedOption[0]});
           });
         }
       });
@@ -92,7 +92,7 @@ class _MyHomePageState extends State<MyHomePage> {
     List<String> tracksToDownload = [];
 
     for (String track in _audioTracks) {
-      if (!_audioPaths.contains(track + '.mp3')) {
+      if (!_audioPaths.contains(track + "-" + selectedOption[0] + '.mp3')) {
         tracksToDownload.add(track);
       }
     }
@@ -108,6 +108,9 @@ class _MyHomePageState extends State<MyHomePage> {
             )));
 
     _audioPaths.addAll(paths);
+    setState(() {
+      _isDownloading = false;
+    });
   }
 
   Future initPlayer() async {
@@ -123,10 +126,10 @@ class _MyHomePageState extends State<MyHomePage> {
     String path = '${dir.path}/$filename';
     File file = File(path);
 
-    if (await file.exists()) {
-      print('File already exists at $path');
-      return path;
-    }
+    // if (await file.exists()) {
+    //   print('File already exists at $path');
+    //   return path;
+    // }
 
     var response = await http.get(Uri.parse(url));
 
@@ -235,9 +238,20 @@ class _MyHomePageState extends State<MyHomePage> {
                                     setState(() {
                                       selectedOption = newOption;
                                       _isDownloading = true;
+                                      _togglePlay();
                                       downloadAndInitializePlayer(newOption)
-                                          .then((value) {
-                                        _isDownloading = false;
+                                          .then((_) {
+                                        print('====== CHANGED TO ' +
+                                            newOption +
+                                            ' ======');
+                                        setState(() {
+                                          _isDownloading = false;
+                                        });
+                                        // _methodChannel.invokeMethod(
+                                        //     "initPlayer", {
+                                        //   "audioTracks": _audioTracks,
+                                        //   "tempo": newOption[0]
+                                        // });
                                       });
                                     });
                                   },
@@ -412,9 +426,9 @@ class _MyBottomSheetState extends State<MyBottomSheet> {
                 style: ElevatedButton.styleFrom(
                   elevation: 0,
                   primary:
-                      selectedOption == 'Slow' ? Colors.blue : Colors.white,
+                      selectedOption == 'slow' ? Colors.blue : Colors.white,
                   onPrimary:
-                      selectedOption == 'Slow' ? Colors.white : Colors.grey,
+                      selectedOption == 'slow' ? Colors.white : Colors.grey,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.0),
                     side: BorderSide(
@@ -424,13 +438,12 @@ class _MyBottomSheetState extends State<MyBottomSheet> {
                 ),
                 onPressed: () {
                   setState(() {
-                    selectedOption = 'Slow';
+                    selectedOption = 'slow';
                     sliderValue = 80;
                     bpm = 80;
-                    _updateValues();
                   });
                 },
-                child: Text('Slow'),
+                child: Text('slow'),
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
@@ -459,9 +472,9 @@ class _MyBottomSheetState extends State<MyBottomSheet> {
                 style: ElevatedButton.styleFrom(
                   elevation: 0,
                   primary:
-                      selectedOption == 'Fast' ? Colors.blue : Colors.white,
+                      selectedOption == 'fast' ? Colors.blue : Colors.white,
                   onPrimary:
-                      selectedOption == 'Fast' ? Colors.white : Colors.grey,
+                      selectedOption == 'fast' ? Colors.white : Colors.grey,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.0),
                     side: BorderSide(
@@ -471,12 +484,12 @@ class _MyBottomSheetState extends State<MyBottomSheet> {
                 ),
                 onPressed: () {
                   setState(() {
-                    selectedOption = 'Fast';
+                    selectedOption = 'fast';
                     sliderValue = 160;
                     bpm = 160;
                   });
                 },
-                child: Text('Fast'),
+                child: Text('fast'),
               ),
             ],
           ),

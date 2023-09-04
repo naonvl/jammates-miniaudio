@@ -43,14 +43,15 @@ public class MainActivity extends FlutterActivity {
 					Log.d("TAG", "List<String> audioTracks :" + call.argument("audioTracks") );
                     audioTracks = (List<String>)call.argument("audioTracks");
 					
-					Log.d("TAG", "List<String> audioTracks :" + audioTracks.get(0) );
+					Log.d("TAG", "List<String> audioTracks :" + audioTracks.get(0) + "-" + call.argument("tempo") );
 					
 					// Reset First the array
 					miniAudioPlayer.ResetList();
+                    
 					///
 					
                     for (String track : audioTracks) {
-                        miniAudioPlayer.AddMusicStreamToPlay(track + ".mp3");
+                        miniAudioPlayer.AddMusicStreamToPlay(track + "-" + call.argument("tempo") + ".mp3");
 
                     }
                     Log.d("TAG", "initPlayer: STARTED");
