@@ -47,6 +47,7 @@ public class MainActivity extends FlutterActivity {
 					
 					// Reset First the array
 					miniAudioPlayer.ResetList();
+                    miniAudioPlayer.StopAllAudio();
                     
 					///
 					

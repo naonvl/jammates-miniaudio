@@ -246,8 +246,6 @@ class _MyHomePageState extends State<MyHomePage> {
                                       setState(() {
                                         selectedOption = newOption;
                                         _isDownloading = true;
-                                        _methodChannel
-                                            .invokeMethod("stopAudio");
                                         downloadAndInitializePlayer(newOption)
                                             .then((_) {
                                           setState(() {
@@ -265,6 +263,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                             "audioTracks": _audioTracks,
                                             "tempo": newOption[0]
                                           });
+                                          _methodChannel
+                                              .invokeMethod("playAudio");
                                         });
                                       });
                                     }
