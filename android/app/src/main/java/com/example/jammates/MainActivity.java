@@ -99,7 +99,6 @@ public class MainActivity extends FlutterActivity {
                     Log.d("TAG", "Pitch volume updated: " + pitch);
 					miniAudioPlayer.SetPitchAllAudio( pitch );
                     break;
-					
                 default:
                     Log.e("TAG", " (call.method) APASIH");
                     break;
