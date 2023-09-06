@@ -42,11 +42,11 @@ public class MainActivity extends FlutterActivity {
 					Log.d("TAG", "switch (call.method) {");
 					Log.d("TAG", "List<String> audioTracks :" + call.argument("audioTracks") );
                     audioTracks = (List<String>)call.argument("audioTracks");
-					
 					Log.d("TAG", "List<String> audioTracks :" + audioTracks.get(0) + "-" + call.argument("tempo") );
 					
 					// Reset First the array
 					miniAudioPlayer.ResetList();
+                    // miniAudioPlayer.StopAllAudio();
                     
 					///
 					
@@ -89,16 +89,18 @@ public class MainActivity extends FlutterActivity {
                 break;
                 case "updateVolume":
                     String trackName = call.argument("trackName");
+                    String tempo = call.argument("tempo");
                     float volume = ((Number) call.argument("volume")).floatValue();
                     Log.d("TAG", trackName + " volume updated: " + volume);
-                    String audioFilePath =  trackName + ".mp3";
+                    String audioFilePath =  trackName + "-" + tempo + ".mp3";
                     miniAudioPlayer.SetMusicVolumeOf(audioFilePath, volume);
                 break;
 				case "setPitch":
-                    float pitch = call.argument("pitch");
+                    float pitch = ((Number) call.argument("pitch")).floatValue();
                     Log.d("TAG", "Pitch volume updated: " + pitch);
 					miniAudioPlayer.SetPitchAllAudio( pitch );
                     break;
+					
                 default:
                     Log.e("TAG", " (call.method) APASIH");
                     break;
