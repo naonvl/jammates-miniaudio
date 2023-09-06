@@ -45,7 +45,10 @@ class _MyHomePageState extends State<MyHomePage> {
   Map<String, double> _trackVolumes = {};
   String selectedOption = 'medium';
   int _currentBpm = 100;
+  double _currentPitch = 1.0;
   int _mediumBpm = 100;
+  int _slowBpm = 90;
+  int _fastBpm = 120;
 
   void _togglePlay() {
     if (_isFirstPlaying && !_isPlaying) {
@@ -229,31 +232,43 @@ class _MyHomePageState extends State<MyHomePage> {
                                 return MyBottomSheet(
                                   selectedOption: selectedOption,
                                   currentBpm: _currentBpm,
-                                  mediumBpm: _mediumBpm,
                                   onUpdate: (newOption, newBpm) {
-                                    setState(() {
-                                      _currentBpm = newBpm;
-                                    });
-                                    if (selectedOption == newOption) return;
-                                    setState(() {
-                                      selectedOption = newOption;
-                                      _isDownloading = true;
-                                      _togglePlay();
-                                      downloadAndInitializePlayer(newOption)
-                                          .then((_) {
-                                        print('====== CHANGED TO ' +
-                                            newOption +
-                                            ' ======');
-                                        setState(() {
-                                          _isDownloading = false;
-                                        });
-                                        // _methodChannel.invokeMethod(
-                                        //     "initPlayer", {
-                                        //   "audioTracks": _audioTracks,
-                                        //   "tempo": newOption[0]
-                                        // });
+                                    if (_currentBpm != newBpm) {
+                                      double newPitch = newBpm / _mediumBpm;
+                                      setState(() {
+                                        _currentBpm = newBpm;
+                                        _currentPitch = newPitch;
                                       });
-                                    });
+                                      _methodChannel.invokeMethod(
+                                          "setPitch", {"pitch": newPitch});
+                                    }
+                                    if (selectedOption != newOption) {
+                                      setState(() {
+                                        selectedOption = newOption;
+                                        _isDownloading = true;
+                                        _methodChannel
+                                            .invokeMethod("stopAudio");
+                                        downloadAndInitializePlayer(newOption)
+                                            .then((_) {
+                                          setState(() {
+                                            _isDownloading = false;
+                                            if (newOption == 'slow') {
+                                              _currentBpm = _slowBpm;
+                                            } else if (newOption == 'medium') {
+                                              _currentBpm = _mediumBpm;
+                                            } else {
+                                              _currentBpm = _fastBpm;
+                                            }
+                                          });
+                                          _methodChannel.invokeMethod(
+                                              "initPlayer", {
+                                            "audioTracks": _audioTracks,
+                                            "tempo": newOption[0]
+                                          });
+                                        });
+                                      });
+                                    }
+                                    ;
                                   },
                                 );
                               },
@@ -347,13 +362,11 @@ class _MyHomePageState extends State<MyHomePage> {
 class MyBottomSheet extends StatefulWidget {
   final String selectedOption;
   final int currentBpm;
-  final int mediumBpm;
   final Function(String, int) onUpdate;
 
   MyBottomSheet(
       {required this.selectedOption,
       required this.currentBpm,
-      required this.mediumBpm,
       required this.onUpdate});
 
   @override
@@ -439,8 +452,8 @@ class _MyBottomSheetState extends State<MyBottomSheet> {
                 onPressed: () {
                   setState(() {
                     selectedOption = 'slow';
-                    sliderValue = 80;
-                    bpm = 80;
+                    sliderValue = widget.currentBpm.toDouble();
+                    bpm = widget.currentBpm;
                   });
                 },
                 child: Text('slow'),
@@ -462,8 +475,8 @@ class _MyBottomSheetState extends State<MyBottomSheet> {
                 onPressed: () {
                   setState(() {
                     selectedOption = 'medium';
-                    sliderValue = widget.mediumBpm.toDouble();
-                    bpm = widget.mediumBpm;
+                    sliderValue = widget.currentBpm.toDouble();
+                    bpm = widget.currentBpm;
                   });
                 },
                 child: Text('medium'),
@@ -485,8 +498,8 @@ class _MyBottomSheetState extends State<MyBottomSheet> {
                 onPressed: () {
                   setState(() {
                     selectedOption = 'fast';
-                    sliderValue = 160;
-                    bpm = 160;
+                    sliderValue = widget.currentBpm.toDouble();
+                    bpm = widget.currentBpm;
                   });
                 },
                 child: Text('fast'),
