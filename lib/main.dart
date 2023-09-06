@@ -129,10 +129,10 @@ class _MyHomePageState extends State<MyHomePage> {
     String path = '${dir.path}/$filename';
     File file = File(path);
 
-    // if (await file.exists()) {
-    //   print('File already exists at $path');
-    //   return path;
-    // }
+    if (await file.exists()) {
+      print('File already exists at $path');
+      return path;
+    }
 
     var response = await http.get(Uri.parse(url));
 
@@ -157,7 +157,7 @@ class _MyHomePageState extends State<MyHomePage> {
       _trackVolumes[trackName] = value;
     });
     _methodChannel.invokeMethod("updateVolume",
-        {"volume": _trackVolumes[trackName], "trackName": trackName});
+        {"volume": value, "trackName": trackName, "tempo": selectedOption[0]});
   }
 
   void _setSolo(String track) {
@@ -169,19 +169,28 @@ class _MyHomePageState extends State<MyHomePage> {
             _soloStates[otherTrack] = false;
             _tempTrackVolumes[otherTrack] = _trackVolumes[otherTrack]!;
             _trackVolumes[otherTrack] = 0;
-            _methodChannel.invokeMethod("updateVolume",
-                {"volume": _trackVolumes[otherTrack], "trackName": otherTrack});
+            _methodChannel.invokeMethod("updateVolume", {
+              "volume": _trackVolumes[otherTrack],
+              "trackName": otherTrack,
+              "tempo": selectedOption[0]
+            });
           } else {
-            _methodChannel.invokeMethod("updateVolume",
-                {"volume": _trackVolumes[track], "trackName": track});
+            _methodChannel.invokeMethod("updateVolume", {
+              "volume": _trackVolumes[track],
+              "trackName": track,
+              "tempo": selectedOption[0]
+            });
           }
         }
       } else {
         for (String otherTrack in _audioTracks) {
           if (otherTrack != track) {
             _trackVolumes[otherTrack] = 1;
-            _methodChannel.invokeMethod("updateVolume",
-                {"volume": _trackVolumes[otherTrack], "trackName": otherTrack});
+            _methodChannel.invokeMethod("updateVolume", {
+              "volume": _trackVolumes[otherTrack],
+              "trackName": otherTrack,
+              "tempo": selectedOption[0]
+            });
           }
         }
       }
@@ -243,6 +252,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                           "setPitch", {"pitch": newPitch});
                                     }
                                     if (selectedOption != newOption) {
+                                      _togglePlay();
+                                      _methodChannel.invokeMethod("stopAudio");
                                       setState(() {
                                         selectedOption = newOption;
                                         _isDownloading = true;
@@ -262,9 +273,10 @@ class _MyHomePageState extends State<MyHomePage> {
                                               "initPlayer", {
                                             "audioTracks": _audioTracks,
                                             "tempo": newOption[0]
+                                          }).then((value) {
+                                            _methodChannel
+                                                .invokeMethod("playAudio");
                                           });
-                                          _methodChannel
-                                              .invokeMethod("playAudio");
                                         });
                                       });
                                     }
@@ -300,10 +312,22 @@ class _MyHomePageState extends State<MyHomePage> {
                                     if (_trackVolumes[track] == 0) {
                                       _trackVolumes[track] =
                                           _tempTrackVolumes[track]!;
+                                      _methodChannel.invokeMethod(
+                                          "updateVolume", {
+                                        "volume": _trackVolumes[track],
+                                        "trackName": track,
+                                        "tempo": selectedOption[0]
+                                      });
                                     } else {
                                       _tempTrackVolumes[track] =
                                           _trackVolumes[track]!;
                                       _trackVolumes[track] = 0;
+                                      _methodChannel.invokeMethod(
+                                          "updateVolume", {
+                                        "volume": 0,
+                                        "trackName": track,
+                                        "tempo": selectedOption[0]
+                                      });
                                     }
                                   });
                                 },
