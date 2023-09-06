@@ -157,7 +157,6 @@ public class MiniAudioPlayer {
 		
 	}
 	
-	
 	private native void InitAssetManagerMini(AssetManager mgr, String path);
 
 	public native void SetIsClosed(int value);

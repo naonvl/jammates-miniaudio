@@ -6,11 +6,8 @@
 #import <Flutter/Flutter.h>
 #import "GeneratedPluginRegistrant.h"
 
-
 #define PLATFORM_IOS
-#include "../../miniaudio/IOSAPI/iosAPI.h"
-#include "../../miniaudio/IOSAPI/iosAPI.c"
-
+#include "iosAPI.h"
 
 #include <stdio.h>
 #include <stdlib.h>

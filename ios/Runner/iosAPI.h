@@ -5,13 +5,13 @@
 #include <string.h>
 #include <sys/types.h>
 
-/* #include "../external/utilities/IOS/utils.h"
+#include "../external/utilities/IOS/utils.h"
 
 #include "../raudio.h"
 #include "../raudio.c"
 
 #include <stdio.h>              // Required for: printf()
- */
+
 #define NUM_OF_MUSIC	11
 
 int isClosed = 0;
@@ -19,6 +19,9 @@ int isClosed = 0;
 int isPlaying = 0;
 int setPitchReady = 0;
 //int pitchValue = 0;
+float currTimePos = 0.0f;
+float musicLegth  = 1.0f;
+
 
 /// IOS
 NSArray *array;
