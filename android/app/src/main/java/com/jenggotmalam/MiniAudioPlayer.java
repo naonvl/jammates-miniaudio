@@ -23,6 +23,7 @@ public class MiniAudioPlayer {
 		Log.v(TAG,  activity.getFilesDir().getPath() );
 		InitAssetManagerMini(activity.getResources().getAssets() , activity.getFilesDir().getPath() );
 		
+		Log.v(TAG, activity.getFilesDir().getPath() );
 		Log.v(TAG, "InitMiniaudio");
 		InitMiniaudio();
 		
@@ -41,6 +42,14 @@ public class MiniAudioPlayer {
 					 });
     }
 
+	public void ResetList()
+	{
+		indexMusic = 0;
+		musicList = new HashMap<String, Integer>();
+		reservedPos = new ArrayList<Integer>(); 
+		ResetListAndUnload();
+	}
+	
 	public void AddMusicStreamToPlay(String pathName) // 
 	{
 		if( indexMusic >= 12 ) // For now harddoced
@@ -61,6 +70,28 @@ public class MiniAudioPlayer {
 		
 		Log.v(TAG, "AddMusicStream( pathName );");
 		AddMusicStream( pathName );
+
+	}
+		
+	public void AddMusicStreamToPlayFromStorage(String pathName) // 
+	{
+		if( indexMusic >= 12 ) // For now harddoced
+			return;
+			
+		Log.v(TAG, "AddMusicStreamToPlayFromStorage(String pathName)");
+		if(reservedPos.size() > 0)
+		{
+			musicList.put(pathName, reservedPos.get( 0 ) );
+			reservedPos.remove( 0 );
+		}
+		else
+		{
+			musicList.put(pathName, indexMusic);
+		}
+		indexMusic++;
+		
+		Log.v(TAG, "AddMusicStreamFromStorage( pathName );");
+		AddMusicStreamFromStorage( pathName );
 
 	}
 	
@@ -126,11 +157,11 @@ public class MiniAudioPlayer {
 		
 	}
 	
-	
 	private native void InitAssetManagerMini(AssetManager mgr, String path);
 
 	public native void SetIsClosed(int value);
 	public native void AddMusicStream(String pathName);
+	public native void AddMusicStreamFromStorage(String pathName);
 	public native void RemoveMusicStream(int pos);
 	public native void CleanResource();
 	public native void InitMiniaudio();
@@ -143,6 +174,7 @@ public class MiniAudioPlayer {
 	public native void ResumeMiniaudio();
 	
 	public native void SetVolumeForMusic(int pos, float vol);
+	public native void ResetListAndUnload();
 	
 	public native void StartThreadMiniaudio();
 

@@ -1,0 +1,1 @@
+adb -s EUHYAUEIGQNFZDCE logcat >LOGCAT.txt

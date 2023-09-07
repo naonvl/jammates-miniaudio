@@ -1,5 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 
 void main() {
   runApp(const MyApp());
@@ -31,27 +35,88 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final _methodChannel = const MethodChannel("method_channel");
   bool _isPlaying = false;
+  bool _isFirstPlaying = true;
+  bool isInitialized = false;
+  bool _isDownloading = true;
   List<String> _audioTracks = ['drum', 'bass', 'piano'];
+  List<String> _audioPaths = [];
   Map<String, bool> _soloStates = {};
   Map<String, double> _tempTrackVolumes = {};
   Map<String, double> _trackVolumes = {};
-  String selectedOption = 'Medium';
+  String selectedOption = 'medium';
+  int _currentBpm = 100;
+  double _currentPitch = 1.0;
+  int _mediumBpm = 100;
+  int _slowBpm = 90;
+  int _fastBpm = 120;
+
   void _togglePlay() {
-    if (!_isPlaying) {
-      _methodChannel.invokeMethod("playSound", {"text": '=====TEST====='});
+    if (_isFirstPlaying && !_isPlaying) {
+      _methodChannel.invokeMethod("playSound");
+      setState(() {
+        _isFirstPlaying = false;
+      });
+    } else if (!_isFirstPlaying && !_isPlaying) {
+      _methodChannel.invokeMethod("resumeSound");
+    } else if (!_isFirstPlaying && _isPlaying) {
+      _methodChannel.invokeMethod("pauseSound");
     } else {
-      _methodChannel.invokeMethod("stopSound", {"text": '=====TEST====='});
+      _methodChannel.invokeMethod("stopSound");
     }
     setState(() {
       _isPlaying = !_isPlaying;
     });
   }
 
+  bool isInitPlayerInvoked = false;
+
   @override
   void initState() {
     super.initState();
+    if (!isInitialized) {
+      isInitialized = true;
+      initPlayer().then((value) {
+        if (!isInitPlayerInvoked) {
+          downloadAndInitializePlayer(selectedOption).then((_) {
+            print('====== STARTED ======');
+            setState(() {
+              _isDownloading = false;
+              isInitPlayerInvoked = true;
+            });
+            _methodChannel.invokeMethod("initPlayer",
+                {"audioTracks": _audioTracks, "tempo": selectedOption[0]});
+          });
+        }
+      });
+    }
+  }
 
-    // Initialize solo states and track volumes based on _audioTracks
+  Future<void> downloadAndInitializePlayer(String selectedOption) async {
+    List<String> tracksToDownload = [];
+
+    for (String track in _audioTracks) {
+      if (!_audioPaths.contains(track + "-" + selectedOption[0] + '.mp3')) {
+        tracksToDownload.add(track);
+      }
+    }
+
+    List<String> paths =
+        await Future.wait(tracksToDownload.map((track) => downloadAndSaveFile(
+              'https://raw.githubusercontent.com/naonvl/vespa%2Dconfigurator%2Dplaycanvas/main/' +
+                  track +
+                  "-" +
+                  selectedOption[0] +
+                  '.mp3',
+              track + "-" + selectedOption[0] + '.mp3',
+            )));
+
+    _audioPaths.addAll(paths);
+    setState(() {
+      _isDownloading = false;
+    });
+  }
+
+  Future initPlayer() async {
     for (String track in _audioTracks) {
       _soloStates[track] = false;
       _tempTrackVolumes[track] = 1.0;
@@ -59,9 +124,30 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  Future<String> downloadAndSaveFile(String url, String filename) async {
+    Directory dir = await getApplicationSupportDirectory();
+    String path = '${dir.path}/$filename';
+    File file = File(path);
+
+    if (await file.exists()) {
+      print('File already exists at $path');
+      return path;
+    }
+
+    var response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      var bytes = response.bodyBytes;
+      await file.writeAsBytes(bytes);
+      print('File saved at $path');
+      return path;
+    } else {
+      throw Exception('Failed to download file');
+    }
+  }
+
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
   }
 
@@ -70,22 +156,46 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       _trackVolumes[trackName] = value;
     });
-    // _methodChannel.invokeMethod("update${indexToPosition(index + 1)}Volume",
-    //     {"volume": _tempTrackVolumes[trackName]});
+    _methodChannel.invokeMethod("updateVolume",
+        {"volume": value, "trackName": trackName, "tempo": selectedOption[0]});
   }
 
-  String indexToPosition(int index) {
-    switch (index) {
-      case 1:
-        return 'First';
-      case 2:
-        return 'Second';
-      case 3:
-        return 'Third';
-      // Add more cases as needed
-      default:
-        return 'Unknown';
-    }
+  void _setSolo(String track) {
+    setState(() {
+      if (_soloStates[track] == false) {
+        _trackVolumes[track] = 1;
+        for (String otherTrack in _audioTracks) {
+          if (otherTrack != track) {
+            _soloStates[otherTrack] = false;
+            _tempTrackVolumes[otherTrack] = _trackVolumes[otherTrack]!;
+            _trackVolumes[otherTrack] = 0;
+            _methodChannel.invokeMethod("updateVolume", {
+              "volume": _trackVolumes[otherTrack],
+              "trackName": otherTrack,
+              "tempo": selectedOption[0]
+            });
+          } else {
+            _methodChannel.invokeMethod("updateVolume", {
+              "volume": _trackVolumes[track],
+              "trackName": track,
+              "tempo": selectedOption[0]
+            });
+          }
+        }
+      } else {
+        for (String otherTrack in _audioTracks) {
+          if (otherTrack != track) {
+            _trackVolumes[otherTrack] = 1;
+            _methodChannel.invokeMethod("updateVolume", {
+              "volume": _trackVolumes[otherTrack],
+              "trackName": otherTrack,
+              "tempo": selectedOption[0]
+            });
+          }
+        }
+      }
+      _soloStates[track] = !_soloStates[track]!;
+    });
   }
 
   @override
@@ -101,26 +211,85 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Row(
-                children: [
-                  ElevatedButton(
-                    onPressed: _togglePlay,
-                    child: Text(_isPlaying ? 'Pause' : 'Play'),
-                  ),
-                  SizedBox(width: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      showModalBottomSheet(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return MyBottomSheet();
-                        },
-                      );
-                    },
-                    child: Text('SET BPM'),
-                  )
-                ],
-              ),
+              _isDownloading
+                  ? Container(
+                      width: double.infinity,
+                      child: const Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircularProgressIndicator(),
+                          SizedBox(
+                            height: 20,
+                          ),
+                          Text('LOADING MP3 FILES'),
+                        ],
+                      ),
+                    )
+                  : Row(
+                      children: [
+                        ElevatedButton(
+                          onPressed: _togglePlay,
+                          child: Text(_isPlaying ? 'Pause' : 'Play'),
+                        ),
+                        SizedBox(width: 20),
+                        ElevatedButton(
+                          onPressed: () {
+                            showModalBottomSheet(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return MyBottomSheet(
+                                  selectedOption: selectedOption,
+                                  currentBpm: _currentBpm,
+                                  onUpdate: (newOption, newBpm) {
+                                    if (_currentBpm != newBpm) {
+                                      double newPitch = newBpm / _mediumBpm;
+                                      setState(() {
+                                        _currentBpm = newBpm;
+                                        _currentPitch = newPitch;
+                                      });
+                                      _methodChannel.invokeMethod(
+                                          "setPitch", {"pitch": newPitch});
+                                    }
+                                    if (selectedOption != newOption) {
+                                      _togglePlay();
+                                      _methodChannel.invokeMethod("stopAudio");
+                                      setState(() {
+                                        selectedOption = newOption;
+                                        _isDownloading = true;
+                                        downloadAndInitializePlayer(newOption)
+                                            .then((_) {
+                                          setState(() {
+                                            _isDownloading = false;
+                                            if (newOption == 'slow') {
+                                              _currentBpm = _slowBpm;
+                                            } else if (newOption == 'medium') {
+                                              _currentBpm = _mediumBpm;
+                                            } else {
+                                              _currentBpm = _fastBpm;
+                                            }
+                                          });
+                                          _methodChannel.invokeMethod(
+                                              "initPlayer", {
+                                            "audioTracks": _audioTracks,
+                                            "tempo": newOption[0]
+                                          }).then((value) {
+                                            _methodChannel
+                                                .invokeMethod("playAudio");
+                                          });
+                                        });
+                                      });
+                                    }
+                                    ;
+                                  },
+                                );
+                              },
+                            );
+                          },
+                          child: Text('TEMPO'),
+                        )
+                      ],
+                    ),
               SizedBox(height: 20),
               Column(
                 children: _audioTracks.asMap().entries.map((entry) {
@@ -132,7 +301,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: <Widget>[
                           Text(
-                            track, // Assuming you have the capitalize function
+                            track,
                             style: Theme.of(context).textTheme.headline6,
                           ),
                           Row(
@@ -143,10 +312,22 @@ class _MyHomePageState extends State<MyHomePage> {
                                     if (_trackVolumes[track] == 0) {
                                       _trackVolumes[track] =
                                           _tempTrackVolumes[track]!;
+                                      _methodChannel.invokeMethod(
+                                          "updateVolume", {
+                                        "volume": _trackVolumes[track],
+                                        "trackName": track,
+                                        "tempo": selectedOption[0]
+                                      });
                                     } else {
                                       _tempTrackVolumes[track] =
                                           _trackVolumes[track]!;
                                       _trackVolumes[track] = 0;
+                                      _methodChannel.invokeMethod(
+                                          "updateVolume", {
+                                        "volume": 0,
+                                        "trackName": track,
+                                        "tempo": selectedOption[0]
+                                      });
                                     }
                                   });
                                 },
@@ -165,25 +346,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               SizedBox(width: 10),
                               ElevatedButton(
                                 onPressed: () {
-                                  setState(() {
-                                    _soloStates[track] = !_soloStates[track]!;
-                                    if (_soloStates[track] == true) {
-                                      for (String otherTrack in _audioTracks) {
-                                        if (otherTrack != track) {
-                                          _tempTrackVolumes[otherTrack] =
-                                              _trackVolumes[otherTrack]!;
-                                          _trackVolumes[otherTrack] = 0;
-                                        }
-                                      }
-                                    } else {
-                                      for (String otherTrack in _audioTracks) {
-                                        if (otherTrack != track) {
-                                          _trackVolumes[otherTrack] =
-                                              _tempTrackVolumes[otherTrack]!;
-                                        }
-                                      }
-                                    }
-                                  });
+                                  _setSolo(track);
                                 },
                                 style: ElevatedButton.styleFrom(
                                   primary: _soloStates[track] == true
@@ -205,8 +368,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         value: _trackVolumes[track]!,
                         min: 0,
                         max: 1,
-                        onChanged: (value) =>
-                            _updateTrackVolume(index, value), // Pass the index
+                        onChanged: (value) => _updateTrackVolume(index, value),
                       ),
                       SizedBox(height: 20),
                     ],
@@ -222,14 +384,36 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class MyBottomSheet extends StatefulWidget {
+  final String selectedOption;
+  final int currentBpm;
+  final Function(String, int) onUpdate;
+
+  MyBottomSheet(
+      {required this.selectedOption,
+      required this.currentBpm,
+      required this.onUpdate});
+
   @override
   _MyBottomSheetState createState() => _MyBottomSheetState();
 }
 
 class _MyBottomSheetState extends State<MyBottomSheet> {
-  String selectedOption = 'Medium';
+  String selectedOption = 'medium';
   int bpm = 120;
   double sliderValue = 120.0;
+  @override
+  void initState() {
+    super.initState();
+    selectedOption = widget.selectedOption;
+    bpm = widget.currentBpm;
+    sliderValue = widget.currentBpm.toDouble();
+  }
+
+  void _updateValues() {
+    setState(() {
+      widget.onUpdate(selectedOption, bpm);
+    });
+  }
 
   void incrementBpm() {
     setState(() {
@@ -268,6 +452,7 @@ class _MyBottomSheetState extends State<MyBottomSheet> {
               icon: Icon(Icons.close),
               onPressed: () {
                 Navigator.of(context).pop();
+                _updateValues();
               },
             ),
           ),
@@ -278,9 +463,9 @@ class _MyBottomSheetState extends State<MyBottomSheet> {
                 style: ElevatedButton.styleFrom(
                   elevation: 0,
                   primary:
-                      selectedOption == 'Slow' ? Colors.blue : Colors.white,
+                      selectedOption == 'slow' ? Colors.blue : Colors.white,
                   onPrimary:
-                      selectedOption == 'Slow' ? Colors.white : Colors.grey,
+                      selectedOption == 'slow' ? Colors.white : Colors.grey,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.0),
                     side: BorderSide(
@@ -290,18 +475,20 @@ class _MyBottomSheetState extends State<MyBottomSheet> {
                 ),
                 onPressed: () {
                   setState(() {
-                    selectedOption = 'Slow';
+                    selectedOption = 'slow';
+                    sliderValue = widget.currentBpm.toDouble();
+                    bpm = widget.currentBpm;
                   });
                 },
-                child: Text('Slow'),
+                child: Text('slow'),
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   elevation: 0,
                   primary:
-                      selectedOption == 'Medium' ? Colors.blue : Colors.white,
+                      selectedOption == 'medium' ? Colors.blue : Colors.white,
                   onPrimary:
-                      selectedOption == 'Medium' ? Colors.white : Colors.grey,
+                      selectedOption == 'medium' ? Colors.white : Colors.grey,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.0),
                     side: BorderSide(
@@ -311,18 +498,20 @@ class _MyBottomSheetState extends State<MyBottomSheet> {
                 ),
                 onPressed: () {
                   setState(() {
-                    selectedOption = 'Medium';
+                    selectedOption = 'medium';
+                    sliderValue = widget.currentBpm.toDouble();
+                    bpm = widget.currentBpm;
                   });
                 },
-                child: Text('Medium'),
+                child: Text('medium'),
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   elevation: 0,
                   primary:
-                      selectedOption == 'Fast' ? Colors.blue : Colors.white,
+                      selectedOption == 'fast' ? Colors.blue : Colors.white,
                   onPrimary:
-                      selectedOption == 'Fast' ? Colors.white : Colors.grey,
+                      selectedOption == 'fast' ? Colors.white : Colors.grey,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.0),
                     side: BorderSide(
@@ -332,10 +521,12 @@ class _MyBottomSheetState extends State<MyBottomSheet> {
                 ),
                 onPressed: () {
                   setState(() {
-                    selectedOption = 'Fast';
+                    selectedOption = 'fast';
+                    sliderValue = widget.currentBpm.toDouble();
+                    bpm = widget.currentBpm;
                   });
                 },
-                child: Text('Fast'),
+                child: Text('fast'),
               ),
             ],
           ),
@@ -392,7 +583,7 @@ class _MyBottomSheetState extends State<MyBottomSheet> {
                           style: TextStyle(fontSize: 20),
                         ),
                         Text(
-                          '100',
+                          '120',
                           style: TextStyle(fontSize: 20),
                         ),
                         Text(
