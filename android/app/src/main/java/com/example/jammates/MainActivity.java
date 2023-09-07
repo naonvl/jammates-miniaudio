@@ -37,8 +37,6 @@ public class MainActivity extends FlutterActivity {
 			Log.d("TAG", "(call, result)");
             switch (call.method) {
                 case "initPlayer":
-                    // Initialize your player here based on audio tracks received from Flutter
-                    //List<String> audioTracks = call.argument("audioTracks");
 					Log.d("TAG", "switch (call.method) {");
 					Log.d("TAG", "List<String> audioTracks :" + call.argument("audioTracks") );
                     audioTracks = (List<String>)call.argument("audioTracks");
@@ -46,18 +44,15 @@ public class MainActivity extends FlutterActivity {
 					
 					// Reset First the array
 					miniAudioPlayer.ResetList();
-                    // miniAudioPlayer.StopAllAudio();
-                    
-					///
-					
                     for (String track : audioTracks) {
                         miniAudioPlayer.AddMusicStreamToPlay(track + "-" + call.argument("tempo") + ".mp3");
 
                     }
                     Log.d("TAG", "initPlayer: STARTED");
+
+
                     break;                
 				case "addMp3FromStorage":
-                    // Initialize your player here based on audio tracks received from Flutter
                     String audioTrack = call.argument("audioTrack");
                     miniAudioPlayer.AddMusicStreamToPlayFromStorage(audioTrack);
 					

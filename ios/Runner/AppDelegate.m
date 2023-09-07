@@ -8,8 +8,8 @@
 
 
 #define PLATFORM_IOS
-//#include "../../miniaudio/IOSAPI/iosAPI.h"
-//#include "../../miniaudio/IOSAPI/iosAPI.c"
+#include "../../miniaudio/IOSAPI/iosAPI.h"
+#include "../../miniaudio/IOSAPI/iosAPI.c"
 
 
 #include <stdio.h>
@@ -30,13 +30,11 @@ pthread_t th1;
   FlutterEventSink _eventSink;
 }
 
-
 - (BOOL)application:(UIApplication*)application
     didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
 		
 		
   InitDeviceMiniaudio();
-   
   SetMasterVolume(1.0f);
    
   // Execute thread
@@ -95,41 +93,35 @@ pthread_t th1;
               SetPitchAll(volumeSet);
               result(@"SetPitchAll method invoked");
             } else if ([@"initPlayer" isEqualToString:call.method]) {
-              NSLog(@"List<String> audioTracks :%@", call.arguments[@"audioTracks"]);
-              NSArray *audioTracks = (NSArray *)call.arguments[@"audioTracks"];
-              NSLog(@"List<String> audioTracks :%@-%@", audioTracks[0], call.arguments[@"tempo"]);
-                AddMusic('drum.mp3');
-                AddMusic('bass.mp3');
-                AddMusic('piano.mp3');
-              for (NSString *track in audioTracks) {
-                // NSString *musicFileName = [NSString stringWithFormat:@"%@-%@.mp3", track, call.arguments[@"tempo"]];
-                //   // [self AddMusic:[NSString stringWithFormat:@"%@-%@.mp3", track, call.arguments[@"tempo"]]];
-                //   [self AddMusic:musicFileName];
-              }
-              NSLog(@"initPlayer: STARTED");
+                NSLog(@"List<String> audioTracks :%@", call.arguments[@"audioTracks"]);
+                NSArray *audioTracks = (NSArray *)call.arguments[@"audioTracks"];
+                NSLog(@"List<String> audioTracks :%@-%@", audioTracks[0], call.arguments[@"tempo"]);
+
+                for (NSString *track in audioTracks) {
+                    NSString *fullTrackName = [track stringByAppendingString:@".mp3"];
+                    const char *cStr = [fullTrackName UTF8String];
+                    AddMusic(cStr);
+                }
+                NSLog(@"initPlayer: STARTED");
+
 
 
             } 
-			else if ([@"updateDrumVolume" isEqualToString:call.method]) {
-			
-float volumeSet = [call.arguments[@"volume"] floatValue];
-                SetVolumeForMusic( "audio/drum.mp3", volumeSet );
+			else if ([@"updateVolume" isEqualToString:call.method]) {
+                NSInteger index = [call.arguments[@"index"] integerValue];
+                float volumeSet = [call.arguments[@"volume"] floatValue];
+                NSLog(@"Volume Set: %f", volumeSet); // Add this log statement
+                SetVolumeForMusic(index, volumeSet);
                 result(@"updateDrumVolume method invoked");
-            } 
-			
-			else if ([@"updateBassVolume" isEqualToString:call.method]) {
-			
-				float volumeSet = [call.arguments[@"volume"] floatValue];
-                SetVolumeForMusic( "audio/bass.mp3", volumeSet );
-                result(@"updateBassVolume method invoked");
-            } 
-			
-			else if ([@"updatePianoVolume" isEqualToString:call.method]) {
-			
-				float volumeSet = [call.arguments[@"volume"] floatValue];
-                SetVolumeForMusic( "audio/piano.mp3", volumeSet );
-                result(@"updatePianoVolume method invoked");
-            } 
+
+            }
+            else if ([@"setPitch" isEqualToString:call.method]) {
+                float pitchSet = [call.arguments[@"pitch"] floatValue];
+                NSLog(@"Volume Set: %f", pitchSet); //
+                SetPitchAll(pitchSet);
+                result(@"updateDrumVolume method invoked");
+
+            }
 			
 			else {
                 result(FlutterMethodNotImplemented);
