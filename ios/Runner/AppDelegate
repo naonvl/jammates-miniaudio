@@ -8,23 +8,35 @@
 
 
 #define PLATFORM_IOS
-//#include "../../miniaudio/IOSAPI/iosAPI.h"
-//#include "../../miniaudio/IOSAPI/iosAPI.c"
+#define MINIAUDIO_IMPLEMENTATION
+/* #include "iosAPI.h"
+#include "iosAPI.c"
 
-
+ */
+ 
+#include "external/miniaudio.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <pthread.h>
+ 
 
+ma_result result;
+ma_engine engine;
+NSString *pathIOS1 ;
+const char* cStr;
 
 void *worker(void *data)
 {
-    ExecutePlayer();
+    //ExecutePlayer();
+	ma_engine_play_sound(&engine, cStr, NULL);
+
+	ma_engine_uninit(&engine);
     return NULL;
 }
  
 pthread_t th1;
+
 
 @implementation AppDelegate {
   FlutterEventSink _eventSink;
@@ -35,12 +47,29 @@ pthread_t th1;
     didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
 		
 		
-  InitDeviceMiniaudio();
+	result = ma_engine_init(NULL, &engine);
+	if (result != MA_SUCCESS) {
+		printf("Failed to initialize audio engine.");
+		return -1;
+	}
+	
+	NSLog(pathIOS1);
+	
+	cStr = [pathIOS1 UTF8String];
+ 	
+		
+/*   InitDeviceMiniaudio();
+  
+  // Add Mp3
+  AddMusic("bass.mp3");
+  AddMusic("drum.mp3");
+  AddMusic("piano.mp3");
    
   SetMasterVolume(1.0f);
-   
+   */
   // Execute thread
   pthread_create(&th1, NULL, worker, "ExecutePlayer");
+
   [GeneratedPluginRegistrant registerWithRegistry:self];
   FlutterViewController* controller =
       (FlutterViewController*)self.window.rootViewController;
@@ -48,7 +77,7 @@ pthread_t th1;
   FlutterMethodChannel* batteryChannel = [FlutterMethodChannel
       methodChannelWithName:@"Battery"
             binaryMessenger:controller];
-
+			
   FlutterMethodChannel* audioMethodChannel = [FlutterMethodChannel
       methodChannelWithName:@"method_channel"
             binaryMessenger:controller];
@@ -71,72 +100,16 @@ pthread_t th1;
     }
   }];
   
+  //StartPlayer();
   
 ///////////////
-       [audioMethodChannel setMethodCallHandler:^(FlutterMethodCall* call,
-    FlutterResult result) {
-        @synchronized (self) { // Protect against potential race conditions
-            if ([@"playSound" isEqualToString:call.method]) {
-                StartPlayer();
-                result(@"StartPlayer method invoked");
-            } else if ([@"stopSound" isEqualToString:call.method]) {
-                StopPlayer();
-                result(@"StopPlayer method invoked");
-            } else if ([@"pauseSound" isEqualToString:call.method]) {
-                PausePlayer();
-                result(@"PausePlayer method invoked");
-            } else if ([@"resumeSound" isEqualToString:call.method]) {
-                ResumePlayer();
-                result(@"ResumePlayer method invoked");
-            } else if ([@"setPitchAll" isEqualToString:call.method]) {
-              float pitchSet = [call.arguments[@"volume"] floatValue];
-              float volumeSet = 0.0; // Initialize volumeSet with an appropriate value
-
-              SetPitchAll(volumeSet);
-              result(@"SetPitchAll method invoked");
-            } else if ([@"initPlayer" isEqualToString:call.method]) {
-              NSLog(@"List<String> audioTracks :%@", call.arguments[@"audioTracks"]);
-              NSArray *audioTracks = (NSArray *)call.arguments[@"audioTracks"];
-              NSLog(@"List<String> audioTracks :%@-%@", audioTracks[0], call.arguments[@"tempo"]);
-                AddMusic('drum.mp3');
-                AddMusic('bass.mp3');
-                AddMusic('piano.mp3');
-              for (NSString *track in audioTracks) {
-                // NSString *musicFileName = [NSString stringWithFormat:@"%@-%@.mp3", track, call.arguments[@"tempo"]];
-                //   // [self AddMusic:[NSString stringWithFormat:@"%@-%@.mp3", track, call.arguments[@"tempo"]]];
-                //   [self AddMusic:musicFileName];
-              }
-              NSLog(@"initPlayer: STARTED");
-
-
-            } 
-			else if ([@"updateDrumVolume" isEqualToString:call.method]) {
-			
-float volumeSet = [call.arguments[@"volume"] floatValue];
-                SetVolumeForMusic( "audio/drum.mp3", volumeSet );
-                result(@"updateDrumVolume method invoked");
-            } 
-			
-			else if ([@"updateBassVolume" isEqualToString:call.method]) {
-			
-				float volumeSet = [call.arguments[@"volume"] floatValue];
-                SetVolumeForMusic( "audio/bass.mp3", volumeSet );
-                result(@"updateBassVolume method invoked");
-            } 
-			
-			else if ([@"updatePianoVolume" isEqualToString:call.method]) {
-			
-				float volumeSet = [call.arguments[@"volume"] floatValue];
-                SetVolumeForMusic( "audio/piano.mp3", volumeSet );
-                result(@"updatePianoVolume method invoked");
-            } 
-			
-			else {
-                result(FlutterMethodNotImplemented);
-            }
-        }
-    }];
-
+  // LoadAudio
+  [audioMethodChannel setMethodCallHandler:^(FlutterMethodCall* call,
+                                         FlutterResult result) {
+    if ([@"playSound" isEqualToString:call.method]) {
+		//StartPlayer();
+    }
+  }];
 
   
 //////////////////
@@ -159,7 +132,6 @@ float volumeSet = [call.arguments[@"volume"] floatValue];
 {
     // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
     // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
-	PausePlayer();
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)application 
