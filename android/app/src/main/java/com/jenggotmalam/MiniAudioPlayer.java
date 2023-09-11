@@ -147,6 +147,12 @@ public class MiniAudioPlayer {
 	public void PlayAllAudio()
 	{
 		// restart playing
+		for(int i =0 ; i < musicList.size(); i++)
+		{
+			Log.v(TAG, "musicList : " + musicList.keySet() );
+			Log.v(TAG, "musicList : " + musicList.values() );
+		}
+		
 		PlayMiniaudio();	
 	}
 	
