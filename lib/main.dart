@@ -53,19 +53,14 @@ class _MyHomePageState extends State<MyHomePage> {
   void _togglePlay() {
     if (_isFirstPlaying && !_isPlaying) {
       _methodChannel.invokeMethod("playSound");
-      setState(() {
-        _isFirstPlaying = false;
-      });
-    } 
-/* 	else if (!_isFirstPlaying && !_isPlaying) {
+    } else if (!_isFirstPlaying && !_isPlaying) {
       _methodChannel.invokeMethod("resumeSound");
-    } else if (!_isFirstPlaying && _isPlaying) {
+    } else {
       _methodChannel.invokeMethod("pauseSound");
-    }  */
-	else {
-      _methodChannel.invokeMethod("playSound");
     }
+
     setState(() {
+      _isFirstPlaying = false;
       _isPlaying = !_isPlaying;
     });
   }
@@ -266,8 +261,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                       setState(() {
                                         selectedOption = newOption;
                                         _isDownloading = true;
-                                        _methodChannel
-                                            .invokeMethod("stopAudio");
+                                        _togglePlay();
                                         downloadAndInitializePlayer(newOption)
                                             .then((_) {
                                           setState(() {
@@ -283,8 +277,16 @@ class _MyHomePageState extends State<MyHomePage> {
                                           _methodChannel.invokeMethod(
                                               "initPlayer", {
                                             "audioTracks": _audioTracks,
-                                            "tempo": newOption[0]
+                                            "tempo": newOption[0],
+                                            "isNewMusic": 'true'
+                                          }).then((value) {
+                                            _methodChannel
+                                                .invokeMethod('resumeAudio');
+                                            _togglePlay();
                                           });
+                                          if (Platform.isIOS) {
+                                            _togglePlay();
+                                          }
                                         });
                                       });
                                     }

@@ -18,6 +18,7 @@ int isClosed = 0;
 //int pauseMusic = 0;
 int isPlaying = 0;
 int setPitchReady = 0;
+int isNewMusicList = 0;
 //int pitchValue = 0;
 float currTimePos = 0.0f;
 float musicLegth  = 1.0f;
