@@ -29,11 +29,8 @@ public class MainActivity extends FlutterActivity {
     @Override
     public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
         super.configureFlutterEngine(flutterEngine);
-
-        // Commands received from Flutter code:
         methodChannel = new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), "method_channel");
         methodChannel.setMethodCallHandler((call, result) -> {
-			
 			Log.d("TAG", "(call, result)");
             switch (call.method) {
                 case "initPlayer":
@@ -41,48 +38,33 @@ public class MainActivity extends FlutterActivity {
 					Log.d("TAG", "List<String> audioTracks :" + call.argument("audioTracks") );
                     audioTracks = (List<String>)call.argument("audioTracks");
 					Log.d("TAG", "List<String> audioTracks :" + audioTracks.get(0) + "-" + call.argument("tempo") );
-					
-					// Reset First the array
 					miniAudioPlayer.StopAllAudio();
 					miniAudioPlayer.ResetList();
                     for (String track : audioTracks) {
                         miniAudioPlayer.AddMusicStreamToPlay(track + "-" + call.argument("tempo") + ".mp3");
-
                     }
-					
                     Log.d("TAG", "initPlayer: STARTED");
-
-
                     break;                
 				case "addMp3FromStorage":
                     String audioTrack = call.argument("audioTrack");
                     miniAudioPlayer.AddMusicStreamToPlayFromStorage(audioTrack);
-					
                     Log.d("TAG", "addMp3FromStorage: STARTED");
                     break;
                 case "playSound":
                     Log.d("TAG", "Play sound: " + call.argument("filePath"));
-					
 					miniAudioPlayer.PlayAllAudio();
-					 
                     break;
                 case "stopSound":
                     Log.d("TAG", "Stop sound: " + call.argument("filePath"));
-					
 					miniAudioPlayer.StopAllAudio();
-					
                     break;
 				case "pauseSound":
                     Log.d("TAG", "Stop sound: " + call.argument("text"));
-					
 					miniAudioPlayer.PauseAllAudio();
-					
                 break;
 				case "resumeSound":
                     Log.d("TAG", "Stop sound: " + call.argument("text"));
-					
 					miniAudioPlayer.ResumeAllAudio();
-					
                 break;
                 case "updateVolume":
                     String trackName = call.argument("trackName");
@@ -97,13 +79,11 @@ public class MainActivity extends FlutterActivity {
                     Log.d("TAG", "Pitch volume updated: " + pitch);
 					miniAudioPlayer.SetPitchAllAudio( pitch );
                     break;
-					
                 default:
-                    Log.e("TAG", " (call.method) APASIH");
                     break;
             }
 			Log.d("TAG", " result.success(null)");
-            result.success(null); // Indicate successful handling of the method call
+            result.success(null);
         });
     }
 

@@ -33,11 +33,11 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final _methodChannel = const MethodChannel("method_channel");
   bool _isPlaying = false;
   bool _isFirstPlaying = true;
   bool isInitialized = false;
   bool _isDownloading = true;
+  final _methodChannel = const MethodChannel("method_channel");
   List<String> _audioTracks = ['drum', 'bass', 'piano'];
   List<String> _audioPaths = [];
   Map<String, bool> _soloStates = {};
@@ -90,13 +90,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> downloadAndInitializePlayer(String selectedOption) async {
     List<String> tracksToDownload = [];
-
     for (String track in _audioTracks) {
       if (!_audioPaths.contains(track + "-" + selectedOption[0] + '.mp3')) {
         tracksToDownload.add(track);
       }
     }
-
     List<String> paths =
         await Future.wait(tracksToDownload.map((track) => downloadAndSaveFile(
               'https://raw.githubusercontent.com/naonvl/vespa%2Dconfigurator%2Dplaycanvas/main/' +

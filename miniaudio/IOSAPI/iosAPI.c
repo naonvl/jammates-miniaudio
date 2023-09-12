@@ -113,9 +113,6 @@ void StopPlayerResume()
     StopPlayer();
     for(int i = 0; i < musicListTogether.count; i++)
     {
-        double musicTimeLength = GetMusicTimeLength( musicListTogether.music[ musicListTogether.indexToPlay[ i ] ] );
-        NSLog(@"currTimePos: %f", currTimePos);
-        NSLog(@"Music Time Length: %f", currTimePos * musicTimeLength);
         SeekMusicStream( musicListTogether.music[ musicListTogether.indexToPlay[ i ] ], currTimePos );
     }
 }
